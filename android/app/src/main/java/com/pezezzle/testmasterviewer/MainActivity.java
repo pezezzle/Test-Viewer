@@ -33,21 +33,21 @@ public final class MainActivity extends FlutterActivity {
                     case "configuration": result.success(configuration().toString()); break;
                     case "loadSettings": result.success(preferences.getString("flutterFilters", "{}")); break;
                     case "saveSettings":
-                        if (!(call.arguments instanceof String)) throw new IllegalArgumentException("Invalid settings.");
+                        if (!(call.arguments instanceof String)) throw new IllegalArgumentException("Ungültige Einstellungen.");
                         String settings = (String) call.arguments;
-                        if (settings.length() > 1024 * 1024) throw new IllegalArgumentException("The settings are too large.");
+                        if (settings.length() > 1024 * 1024) throw new IllegalArgumentException("Die Einstellungen sind zu gross.");
                         new JSONObject(settings);
                         // Commit confirms persistence before acknowledging the method call.
                         executor.execute(() -> {
                             boolean saved = preferences.edit().putString("flutterFilters", settings).commit();
-                            runOnUiThread(() -> { if (!destroyed) { if (saved) result.success(null); else result.error("settings", "The settings could not be saved.", null); } });
+                            runOnUiThread(() -> { if (!destroyed) { if (saved) result.success(null); else result.error("settings", "Die Einstellungen konnten nicht gespeichert werden.", null); } });
                         });
                         break;
                     case "chooseFolder": chooseFolder(result); break;
                     case "savePath":
-                        if (!(call.arguments instanceof String)) throw new IllegalArgumentException("Enter a file name.");
+                        if (!(call.arguments instanceof String)) throw new IllegalArgumentException("Gib einen Dateinamen ein.");
                         String path = PathPolicy.normalize((String) call.arguments);
-                        if (!preferences.edit().putString("path", path).commit()) throw new IllegalStateException("The path could not be saved.");
+                        if (!preferences.edit().putString("path", path).commit()) throw new IllegalStateException("Der Pfad konnte nicht gespeichert werden.");
                         result.success(configuration().toString());
                         break;
                     case "readSnapshot": readSnapshot(result); break;
@@ -66,12 +66,12 @@ public final class MainActivity extends FlutterActivity {
         value.put("treeUri", tree);
         value.put("path", preferences.getString("path", "pcdrdata.sqlite3"));
         value.put("configured", !tree.isEmpty());
-        value.put("version", "2.0.0");
+        value.put("version", "2.0.1");
         return value;
     }
 
     private void chooseFolder(MethodChannel.Result result) {
-        if (pendingPicker != null) { result.error("busy", "The folder picker is already open.", null); return; }
+        if (pendingPicker != null) { result.error("busy", "Die Ordnerauswahl ist bereits geöffnet.", null); return; }
         pendingPicker = result;
         try {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
@@ -81,7 +81,7 @@ public final class MainActivity extends FlutterActivity {
             startActivityForResult(intent, PICK_DIRECTORY);
         } catch (Exception exception) {
             pendingPicker = null;
-            result.error("picker", "The Android file picker could not be opened.", null);
+            result.error("picker", "Die Android-Dateiauswahl konnte nicht geöffnet werden.", null);
         }
     }
 
@@ -95,15 +95,15 @@ public final class MainActivity extends FlutterActivity {
         try {
             Uri selected = data.getData();
             getContentResolver().takePersistableUriPermission(selected, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            if (!preferences.edit().putString("tree", selected.toString()).commit()) throw new IllegalStateException("The folder grant could not be saved.");
+            if (!preferences.edit().putString("tree", selected.toString()).commit()) throw new IllegalStateException("Die Ordnerfreigabe konnte nicht gespeichert werden.");
             result.success(configuration().toString());
-        } catch (Exception exception) { result.error("permission", "The read grant could not be saved. Select a local folder under Documents.", null); }
+        } catch (Exception exception) { result.error("permission", "Die Lesefreigabe konnte nicht gespeichert werden. Wähle unter Dokumente einen lokalen Ordner.", null); }
     }
 
     private void readSnapshot(MethodChannel.Result result) {
         final String tree = preferences.getString("tree", "");
         final String path = preferences.getString("path", "pcdrdata.sqlite3");
-        if (tree.isEmpty()) { result.error("source", "Select the database folder first.", null); return; }
+        if (tree.isEmpty()) { result.error("source", "Wähle zuerst den Datenbankordner aus.", null); return; }
         executor.execute(() -> {
             try {
                 String snapshot = new SnapshotReader(getApplicationContext()).read(Uri.parse(tree), path).toString();
@@ -118,7 +118,7 @@ public final class MainActivity extends FlutterActivity {
     protected void onDestroy() {
         destroyed = true;
         if (channel != null) channel.setMethodCallHandler(null);
-        if (pendingPicker != null) { pendingPicker.error("cancelled", "Folder selection was closed.", null); pendingPicker = null; }
+        if (pendingPicker != null) { pendingPicker.error("cancelled", "Die Ordnerauswahl wurde geschlossen.", null); pendingPicker = null; }
         executor.shutdownNow();
         super.onDestroy();
     }

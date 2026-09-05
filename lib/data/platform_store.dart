@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
+
 import '../domain/device.dart';
 
 class SourceConfiguration {
@@ -13,13 +15,12 @@ class SourceConfiguration {
     this.configured = false,
     this.sourceId = '',
   });
-  factory SourceConfiguration.fromJson(Map<String, Object?> value) =>
-      SourceConfiguration(
-        folder: value['folder']?.toString() ?? '',
-        path: value['path']?.toString() ?? 'pcdrdata.sqlite3',
-        configured: value['configured'] == true,
-        sourceId: value['treeUri']?.toString() ?? '',
-      );
+  factory SourceConfiguration.fromJson(Map<String, Object?> value) => SourceConfiguration(
+    folder: value['folder']?.toString() ?? '',
+    path: value['path']?.toString() ?? 'pcdrdata.sqlite3',
+    configured: value['configured'] == true,
+    sourceId: value['treeUri']?.toString() ?? '',
+  );
   String get identity => '$sourceId/$path';
 }
 
@@ -37,31 +38,23 @@ class PlatformViewerStore implements ViewerStore {
 
   Future<Map<String, Object?>> _map(String method, [Object? arguments]) async {
     final result = await channel.invokeMethod<Object?>(method, arguments);
-    if (result is String)
-      return Map<String, Object?>.from(jsonDecode(result) as Map);
+    if (result is String) return Map<String, Object?>.from(jsonDecode(result) as Map);
     if (result is Map) return Map<String, Object?>.from(result);
-    throw const FormatException('The platform returned an invalid response.');
+    throw const FormatException('Die Plattform hat eine ungültige Antwort geliefert.');
   }
 
   @override
-  Future<SourceConfiguration> configuration() async =>
-      SourceConfiguration.fromJson(await _map('configuration'));
+  Future<SourceConfiguration> configuration() async => SourceConfiguration.fromJson(await _map('configuration'));
   @override
   Future<SourceConfiguration?> chooseFolder() async {
     final result = await channel.invokeMethod<String>('chooseFolder');
-    return result == null
-        ? null
-        : SourceConfiguration.fromJson(
-            Map<String, Object?>.from(jsonDecode(result) as Map),
-          );
+    return result == null ? null : SourceConfiguration.fromJson(Map<String, Object?>.from(jsonDecode(result) as Map));
   }
 
   @override
-  Future<SourceConfiguration> savePath(String path) async =>
-      SourceConfiguration.fromJson(await _map('savePath', path));
+  Future<SourceConfiguration> savePath(String path) async => SourceConfiguration.fromJson(await _map('savePath', path));
   @override
-  Future<InspectionSnapshot> read() async =>
-      InspectionSnapshot.fromJson(await _map('readSnapshot'));
+  Future<InspectionSnapshot> read() async => InspectionSnapshot.fromJson(await _map('readSnapshot'));
   @override
   Future<Map<String, Object?>> loadSettings() async => _map('loadSettings');
   @override

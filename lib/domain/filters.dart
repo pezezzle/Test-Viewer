@@ -3,15 +3,7 @@ import 'device.dart';
 
 const pageSizes = [5, 10, 25, 50, 100];
 const horizons = [12, 24, 36, 48, 60];
-const sortFields = [
-  'NextTest',
-  'Location',
-  'IDNumber',
-  'DeviceDescription',
-  'Manufacturer',
-  'LastTest',
-  'TestResult',
-];
+const sortFields = ['NextTest', 'Location', 'IDNumber', 'DeviceDescription', 'Manufacturer', 'LastTest', 'TestResult'];
 
 class ViewerFilters {
   Set<String> locations;
@@ -47,25 +39,10 @@ class ViewerFilters {
     final horizon = int.tryParse('${json['horizonMonths']}') ?? 12;
     final month = json['month']?.toString() ?? '';
     return ViewerFilters(
-      locations: selected is List
-          ? selected.whereType<String>().toSet()
-          : <String>{},
+      locations: selected is List ? selected.whereType<String>().toSet() : <String>{},
       search: json['search'] is String ? json['search']! as String : '',
-      due:
-          [
-            '*',
-            'overdue',
-            'today',
-            'soon',
-            'medium',
-            'later',
-            'missing',
-          ].contains(due)
-          ? due
-          : '*',
-      result: ['*', 'OK', 'F', 'empty', 'other'].contains(result)
-          ? result
-          : '*',
+      due: ['*', 'overdue', 'today', 'soon', 'medium', 'later', 'missing'].contains(due) ? due : '*',
+      result: ['*', 'OK', 'F', 'empty', 'other'].contains(result) ? result : '*',
       sortField: sortFields.contains(sort.first) ? sort.first : 'NextTest',
       descending: sort.length > 1 && sort[1] == 'desc',
       month: RegExp(r'^\d{4}-(0[1-9]|1[0-2])$').hasMatch(month) ? month : '',
@@ -86,8 +63,7 @@ class ViewerFilters {
     'horizonMonths': horizonMonths,
     'referenceDate': manualDate?.iso ?? '',
   };
-  CalendarDay reference([DateTime? now]) =>
-      manualDate ?? CalendarDay.today(now);
+  CalendarDay reference([DateTime? now]) => manualDate ?? CalendarDay.today(now);
   void clearSearchScope() {
     locations.clear();
     search = '';
@@ -97,26 +73,16 @@ class ViewerFilters {
   }
 }
 
-List<DeviceRecord> scopeDevices(
-  List<DeviceRecord> records,
-  Set<String> locations,
-) => locations.isEmpty
-    ? records
-    : records.where((device) => locations.contains(device.location)).toList();
+List<DeviceRecord> scopeDevices(List<DeviceRecord> records, Set<String> locations) =>
+    locations.isEmpty ? records : records.where((device) => locations.contains(device.location)).toList();
 
-List<DeviceRecord> filterDevices(
-  List<DeviceRecord> records,
-  ViewerFilters filters,
-  CalendarDay reference,
-) {
+List<DeviceRecord> filterDevices(List<DeviceRecord> records, ViewerFilters filters, CalendarDay reference) {
   final tokens = searchTokens(filters.search);
   final filtered = scopeDevices(records, filters.locations).where((device) {
     final status = device.due(reference);
     final dueMatches =
         filters.due == '*' ||
-        (filters.due == 'soon'
-            ? status == DueStatus.today || status == DueStatus.soon
-            : status.name == filters.due);
+        (filters.due == 'soon' ? status == DueStatus.today || status == DueStatus.soon : status.name == filters.due);
     final resultMatches =
         filters.result == '*' ||
         (filters.result == 'empty'
@@ -129,10 +95,7 @@ List<DeviceRecord> filterDevices(
         (device.nextDay != null &&
             device.nextDay!.compareTo(reference) >= 0 &&
             device.nextDay!.monthKey == filters.month);
-    return dueMatches &&
-        resultMatches &&
-        monthMatches &&
-        tokens.every(device.searchText.contains);
+    return dueMatches && resultMatches && monthMatches && tokens.every(device.searchText.contains);
   }).toList();
   filtered.sort((a, b) {
     var comparison = 0;
@@ -144,19 +107,13 @@ List<DeviceRecord> filterDevices(
       if (av != null && bv != null) comparison = av.compareTo(bv);
     } else {
       comparison = naturalCompare(
-        filters.sortField == 'Location'
-            ? a.location
-            : a.value(filters.sortField),
-        filters.sortField == 'Location'
-            ? b.location
-            : b.value(filters.sortField),
+        filters.sortField == 'Location' ? a.location : a.value(filters.sortField),
+        filters.sortField == 'Location' ? b.location : b.value(filters.sortField),
       );
     }
     if (comparison != 0) return filters.descending ? -comparison : comparison;
     final idOrder = naturalCompare(a.id, b.id);
-    return idOrder != 0
-        ? idOrder
-        : naturalCompare(a.customerNumber, b.customerNumber);
+    return idOrder != 0 ? idOrder : naturalCompare(a.customerNumber, b.customerNumber);
   });
   return filtered;
 }
@@ -167,19 +124,12 @@ class ForecastMonth {
   const ForecastMonth(this.start, this.count);
 }
 
-List<ForecastMonth> forecast(
-  List<DeviceRecord> scope,
-  CalendarDay reference,
-  int months,
-) {
+List<ForecastMonth> forecast(List<DeviceRecord> scope, CalendarDay reference, int months) {
   final bucket = <String, int>{};
   final end = reference.monthStart(months);
   for (final device in scope) {
     final next = device.nextDay;
-    if (next == null ||
-        next.compareTo(reference) < 0 ||
-        next.compareTo(end) >= 0)
-      continue;
+    if (next == null || next.compareTo(reference) < 0 || next.compareTo(end) >= 0) continue;
     bucket.update(next.monthKey, (count) => count + 1, ifAbsent: () => 1);
   }
   return List.generate(months, (index) {
@@ -193,10 +143,7 @@ class DashboardCounts {
   final int total;
   final int failed;
   const DashboardCounts(this.counts, this.total, this.failed);
-  factory DashboardCounts.fromDevices(
-    List<DeviceRecord> scope,
-    CalendarDay reference,
-  ) {
+  factory DashboardCounts.fromDevices(List<DeviceRecord> scope, CalendarDay reference) {
     final counts = {for (final status in DueStatus.values) status: 0};
     var failed = 0;
     for (final device in scope) {

@@ -13,6 +13,9 @@ blocked = re.compile(r'(?i)(\.(?:p12|pfx|jks|keystore|pem|key|sqlite3?|db|apk|aa
 errors = []
 for path in files:
     relative = path.relative_to(ROOT).as_posix()
+    # Deleted tracked paths remain visible to git until the reviewed changes are committed.
+    if not path.is_file():
+        continue
     if blocked.search(relative):
         errors.append(relative)
         continue

@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'data/demo_store.dart';
 import 'data/platform_store.dart';
 import 'state/viewer_controller.dart';
@@ -31,10 +33,7 @@ class _TestMasterAppState extends State<TestMasterApp> {
   }
 
   void _createController() {
-    controller = ViewerController(
-      store: demo ? DemoViewerStore() : widget.store ?? PlatformViewerStore(),
-      demo: demo,
-    );
+    controller = ViewerController(store: demo ? DemoViewerStore() : widget.store ?? PlatformViewerStore(), demo: demo);
     unawaited(controller.initialize());
   }
 
@@ -58,16 +57,12 @@ class _TestMasterAppState extends State<TestMasterApp> {
     debugShowCheckedModeBanner: false,
     theme: viewerTheme(),
     locale: const Locale('de', 'CH'),
-    supportedLocales: const [Locale('de', 'CH'), Locale('de'), Locale('en')],
+    supportedLocales: const [Locale('de', 'CH'), Locale('de')],
     localizationsDelegates: const [
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    home: HomeScreen(
-      key: ValueKey(demo),
-      controller: controller,
-      onToggleDemo: _toggleDemo,
-    ),
+    home: HomeScreen(key: ValueKey(demo), controller: controller, onToggleDemo: _toggleDemo),
   );
 }

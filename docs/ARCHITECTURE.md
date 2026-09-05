@@ -22,13 +22,11 @@ Method channel: `com.pezezzle.testmasterviewer/data`.
 
 Android uses Java, `FlutterActivity`, the Storage Access Framework, SharedPreferences, and Android SQLite. Reads run on a serial worker and return results on the UI thread.
 
-iOS uses Swift, `FlutterAppDelegate`/`FlutterSceneDelegate`, `UIDocumentPickerViewController`, a security-scoped bookmark, UserDefaults, and SQLite3. `NSFileCoordinator` coordinates file reads on a serial queue.
-
 ## Data model
 
 The required table is `tblIDNumbers` with `CustomerNumber`, `IDNumber`, `Location`, `DeviceDescription`, and `NextTest`. Additional known columns are included when present; missing optional columns remain empty. Customers are read from `tblCustomer` when available. If a customer name is missing, the customer number is displayed.
 
-Devices are identified by **customer number + device ID**. IDs remain strings to preserve leading zeroes. Identical device IDs owned by different customers are never merged. Empty locations appear as **No location**. Multiple selected locations use OR; different filters and search terms use AND.
+Devices are identified by **customer number + device ID**. IDs remain strings to preserve leading zeroes. Identical device IDs owned by different customers are never merged. Empty locations appear as **Ohne Standort** in the German UI. Multiple selected locations use OR; different filters and search terms use AND.
 
 Due-date reporting uses `NextTest` from the device master record. Dates are not projected from inspection intervals, and results are not reconstructed from other tables. `LastTest` and the result code also come from the device master record. Reinterpreting inspection history is outside the scope of the two views.
 
@@ -50,4 +48,4 @@ Limits: 512 MB source file, 200,000 records in the mobile reader, and 500 charac
 
 The app has no server connection, telemetry, account, or remote fonts. Android release builds have no `INTERNET` permission; debug/profile builds require it for Flutter tooling. The source grant and filters are stored locally. Operating-system backups and the origin of a user-selected file are outside the app's control.
 
-Public source files contain no original database and no private keys. The iOS privacy manifest describes the local APIs in use and must be checked again against the final archive before store submission.
+Public source files contain no original database and no private keys.

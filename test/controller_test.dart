@@ -10,11 +10,8 @@ class TestStore extends DemoViewerStore {
   String sourceId = 'test-source';
   TestStore() : super(reference: const CalendarDay(2026, 9, 5));
   @override
-  Future<SourceConfiguration> configuration() async => SourceConfiguration(
-    folder: sourceId,
-    sourceId: sourceId,
-    configured: true,
-  );
+  Future<SourceConfiguration> configuration() async =>
+      SourceConfiguration(folder: sourceId, sourceId: sourceId, configured: true);
   @override
   Future<InspectionSnapshot> read() async {
     if (failRead) throw StateError('Test read failure');
@@ -43,22 +40,19 @@ void main() {
     expect(controller.totalPages, 4);
     expect(controller.busy, false);
   });
-  test(
-    'Failed refresh keeps the previous data with explicit stale state',
-    () async {
-      await controller.initialize();
-      final previous = controller.snapshot;
-      store.failRead = true;
-      await controller.refresh();
-      expect(controller.snapshot, same(previous));
-      expect(controller.stale, true);
-      expect(controller.error, isNotNull);
-      store.failRead = false;
-      await controller.refresh();
-      expect(controller.stale, false);
-      expect(controller.error, isNull);
-    },
-  );
+  test('Failed refresh keeps the previous data with explicit stale state', () async {
+    await controller.initialize();
+    final previous = controller.snapshot;
+    store.failRead = true;
+    await controller.refresh();
+    expect(controller.snapshot, same(previous));
+    expect(controller.stale, true);
+    expect(controller.error, isNotNull);
+    store.failRead = false;
+    await controller.refresh();
+    expect(controller.stale, false);
+    expect(controller.error, isNull);
+  });
   test('Automatic reference date changes at midnight', () async {
     await controller.initialize();
     controller.filters.month = '2026-09';
@@ -81,29 +75,24 @@ void main() {
   });
   test('Settings restore multiple locations and forecast horizon', () async {
     store.settings = {
-      'locations': ['Workshop', 'Kitchen'],
+      'locations': ['Werkstatt', 'Küche'],
       'horizonMonths': 60,
       'pageSize': 5,
       'referenceDate': '2027-01-01',
     };
     await controller.initialize();
-    expect(controller.filters.locations, {'Workshop', 'Kitchen'});
+    expect(controller.filters.locations, {'Werkstatt', 'Küche'});
     expect(controller.filters.horizonMonths, 60);
     expect(controller.pageRows.length, 5);
     expect(controller.reference, const CalendarDay(2027, 1, 1));
   });
   test('Drill down retains selected locations', () async {
     await controller.initialize();
-    controller.setLocations({'Workshop', 'Kitchen'});
+    controller.setLocations({'Werkstatt', 'Küche'});
     controller.openFiltered(due: 'overdue');
     expect(controller.tab, 1);
-    expect(controller.filters.locations, {'Workshop', 'Kitchen'});
-    expect(
-      controller.filtered.every(
-        (row) => row.due(controller.reference) == DueStatus.overdue,
-      ),
-      true,
-    );
+    expect(controller.filters.locations, {'Werkstatt', 'Küche'});
+    expect(controller.filtered.every((row) => row.due(controller.reference) == DueStatus.overdue), true);
   });
   test('Pagination clamps after filtering', () async {
     await controller.initialize();
@@ -127,13 +116,10 @@ void main() {
   });
   test('Customer heading is derived from the selected devices', () async {
     await controller.initialize();
-    expect(controller.customerHeading, '2 customers');
+    expect(controller.customerHeading, '2 Kunden');
     controller.snapshot = InspectionSnapshot(
       devices: [
-        DeviceRecord(
-          {'IDNumber': '001', 'CustomerNumber': '123'},
-          {'123': 'Independent customer'},
-        ),
+        DeviceRecord({'IDNumber': '001', 'CustomerNumber': '123'}, {'123': 'Independent customer'}),
       ],
       customers: {'123': 'Independent customer'},
       sourceLabel: 'test',

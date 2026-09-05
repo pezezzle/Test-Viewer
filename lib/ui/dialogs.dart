@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../domain/calendar_day.dart';
 import '../domain/device.dart';
 import '../state/viewer_controller.dart';
@@ -18,48 +20,31 @@ Future<void> _showDialogUntilRemoved({
     context: context,
     builder: builder,
     themes: InheritedTheme.capture(from: context, to: navigator.context),
-    barrierColor:
-        DialogTheme.of(context).barrierColor ??
-        Theme.of(context).dialogTheme.barrierColor ??
-        Colors.black54,
+    barrierColor: DialogTheme.of(context).barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
     barrierDismissible: barrierDismissible,
   );
   await navigator.push(route);
   await route.completed;
 }
 
-Future<void> showLocations(
-  BuildContext context,
-  ViewerController controller,
-) async {
+Future<void> showLocations(BuildContext context, ViewerController controller) async {
   final selected = Set<String>.of(controller.filters.locations);
   final search = TextEditingController();
   final counts = <String, int>{};
   for (final record in controller.snapshot?.devices ?? <DeviceRecord>[]) {
     counts.update(record.location, (count) => count + 1, ifAbsent: () => 1);
   }
-  final values = {...controller.locations, ...selected}.toList()
-    ..sort(naturalCompare);
+  final values = {...controller.locations, ...selected}.toList()..sort(naturalCompare);
   await _showDialogUntilRemoved(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) {
         final tokens = searchTokens(search.text);
         final matches = values
-            .where(
-              (location) => tokens.every(
-                (token) =>
-                    normalizeSearch(locationLabel(location)).contains(token),
-              ),
-            )
+            .where((location) => tokens.every((token) => normalizeSearch(locationLabel(location)).contains(token)))
             .toList();
-        final selectionLabel = selected.isEmpty
-            ? 'All locations'
-            : '${selected.length} selected';
-        final availableHeight =
-            MediaQuery.sizeOf(context).height -
-            MediaQuery.viewInsetsOf(context).bottom -
-            48;
+        final selectionLabel = selected.isEmpty ? 'Alle Standorte' : '${selected.length} ausgewählt';
+        final availableHeight = MediaQuery.sizeOf(context).height - MediaQuery.viewInsetsOf(context).bottom - 48;
         return Dialog(
           insetPadding: const EdgeInsets.all(18),
           child: SizedBox(
@@ -74,15 +59,12 @@ Future<void> showLocations(
                       children: [
                         const Expanded(
                           child: Text(
-                            'Select locations',
-                            style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            'Standorte auswählen',
+                            style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Close',
+                          tooltip: 'Schliessen',
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.close),
                         ),
@@ -92,12 +74,12 @@ Future<void> showLocations(
                       key: const ValueKey('location-search'),
                       controller: search,
                       decoration: InputDecoration(
-                        hintText: 'Search locations …',
+                        hintText: 'Standorte suchen …',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: search.text.isEmpty
                             ? null
                             : IconButton(
-                                tooltip: 'Clear search',
+                                tooltip: 'Suche leeren',
                                 onPressed: () => setState(search.clear),
                                 icon: const Icon(Icons.close),
                               ),
@@ -107,15 +89,10 @@ Future<void> showLocations(
                     Wrap(
                       spacing: 6,
                       children: [
+                        TextButton(onPressed: () => setState(selected.clear), child: const Text('Alle Standorte')),
                         TextButton(
-                          onPressed: () => setState(selected.clear),
-                          child: const Text('All locations'),
-                        ),
-                        TextButton(
-                          onPressed: matches.isEmpty
-                              ? null
-                              : () => setState(() => selected.addAll(matches)),
-                          child: const Text('Select results'),
+                          onPressed: matches.isEmpty ? null : () => setState(() => selected.addAll(matches)),
+                          child: const Text('Treffer auswählen'),
                         ),
                       ],
                     ),
@@ -123,20 +100,14 @@ Future<void> showLocations(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         '${matches.length} Treffer · $selectionLabel',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ViewerColors.muted,
-                        ),
+                        style: const TextStyle(fontSize: 12, color: ViewerColors.muted),
                       ),
                     ),
                     const SizedBox(height: 5),
                     SizedBox(
-                      height: math.max(
-                        100.0,
-                        math.min(620.0, availableHeight) - 320,
-                      ),
+                      height: math.max(100.0, math.min(620.0, availableHeight) - 320),
                       child: matches.isEmpty
-                          ? const Center(child: Text('No location found.'))
+                          ? const Center(child: Text('Kein Standort gefunden.'))
                           : ListView.builder(
                               itemCount: matches.length,
                               itemBuilder: (context, index) {
@@ -144,18 +115,13 @@ Future<void> showLocations(
                                 return CheckboxListTile(
                                   key: ValueKey('location-$location'),
                                   dense: true,
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
+                                  controlAffinity: ListTileControlAffinity.leading,
                                   contentPadding: EdgeInsets.zero,
                                   title: Text(locationLabel(location)),
                                   subtitle: !counts.containsKey(location)
-                                      ? const Text(
-                                          'Not in the current snapshot',
-                                        )
+                                      ? const Text('Nicht im aktuellen Datenstand')
                                       : null,
-                                  secondary: Text(
-                                    formatCount(counts[location] ?? 0),
-                                  ),
+                                  secondary: Text(formatCount(counts[location] ?? 0)),
                                   value: selected.contains(location),
                                   onChanged: (value) => setState(() {
                                     if (value == true) {
@@ -173,9 +139,7 @@ Future<void> showLocations(
                       children: [
                         Expanded(
                           child: Text(
-                            selected.isEmpty
-                                ? 'No restriction'
-                                : '${selected.length} Standorte',
+                            selected.isEmpty ? 'Keine Einschränkung' : '${selected.length} Standorte',
                             style: const TextStyle(fontSize: 12),
                           ),
                         ),
@@ -184,7 +148,7 @@ Future<void> showLocations(
                             controller.setLocations(selected);
                             Navigator.pop(context);
                           },
-                          child: const Text('Apply'),
+                          child: const Text('Übernehmen'),
                         ),
                       ],
                     ),
@@ -200,10 +164,7 @@ Future<void> showLocations(
   search.dispose();
 }
 
-Future<void> showReferenceDate(
-  BuildContext context,
-  ViewerController controller,
-) async {
+Future<void> showReferenceDate(BuildContext context, ViewerController controller) async {
   var selected = controller.reference;
   final input = TextEditingController(text: selected.iso);
   String? error;
@@ -224,23 +185,17 @@ Future<void> showReferenceDate(
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
-                          'Select reference date',
-                          style: TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: Text('Stichtag auswählen', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w600)),
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        tooltip: 'Close',
+                        tooltip: 'Schliessen',
                         icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
                   const Text(
-                    'Due dates and forecasts are calculated for this date. Inspection data remains unchanged.',
+                    'Fälligkeiten und Vorschauen werden für dieses Datum berechnet. Die Prüfdaten bleiben unverändert.',
                     style: TextStyle(color: ViewerColors.muted, fontSize: 13),
                   ),
                   const SizedBox(height: 15),
@@ -249,7 +204,7 @@ Future<void> showReferenceDate(
                     controller: input,
                     keyboardType: TextInputType.datetime,
                     decoration: InputDecoration(
-                      labelText: 'Date (YYYY-MM-DD)',
+                      labelText: 'Datum (JJJJ-MM-TT)',
                       hintText: '2026-09-05',
                       errorText: error,
                     ),
@@ -268,17 +223,13 @@ Future<void> showReferenceDate(
                     firstDate: DateTime(1900),
                     lastDate: DateTime(9999, 12, 31),
                     onDateChanged: (value) => setState(() {
-                      selected = CalendarDay(
-                        value.year,
-                        value.month,
-                        value.day,
-                      );
+                      selected = CalendarDay(value.year, value.month, value.day);
                       input.text = selected.iso;
                       error = null;
                     }),
                   ),
                   const Text(
-                    'A manual date remains saved. “Today · automatic” follows the current date again.',
+                    'Ein manueller Stichtag bleibt gespeichert. „Heute · automatisch“ folgt wieder dem aktuellen Datum.',
                     style: TextStyle(fontSize: 12, color: ViewerColors.muted),
                   ),
                   const SizedBox(height: 16),
@@ -292,22 +243,19 @@ Future<void> showReferenceDate(
                           controller.setReference(null);
                           Navigator.pop(context);
                         },
-                        child: const Text('Today · automatic'),
+                        child: const Text('Heute · automatisch'),
                       ),
                       FilledButton(
                         onPressed: () {
                           final date = CalendarDay.parseReference(input.text);
                           if (date == null) {
-                            setState(
-                              () => error =
-                                  'Enter a valid date between 1900 and 9999.',
-                            );
+                            setState(() => error = 'Gib ein gültiges Datum zwischen 1900 und 9999 ein.');
                             return;
                           }
                           controller.setReference(date);
                           Navigator.pop(context);
                         },
-                        child: const Text('Apply'),
+                        child: const Text('Übernehmen'),
                       ),
                     ],
                   ),
@@ -322,10 +270,7 @@ Future<void> showReferenceDate(
   input.dispose();
 }
 
-Future<void> showSourceSettings(
-  BuildContext context,
-  ViewerController controller,
-) async {
+Future<void> showSourceSettings(BuildContext context, ViewerController controller) async {
   controller.suspendAutoRefresh++;
   final path = TextEditingController(text: controller.config.path);
   var working = false;
@@ -352,40 +297,27 @@ Future<void> showSourceSettings(
                         children: [
                           const Expanded(
                             child: Text(
-                              'Configure database',
-                              style: TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              'Datenbank einrichten',
+                              style: TextStyle(fontSize: 21, fontWeight: FontWeight.w600),
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Close',
-                            onPressed: working
-                                ? null
-                                : () => Navigator.pop(context),
+                            tooltip: 'Schliessen',
+                            onPressed: working ? null : () => Navigator.pop(context),
                             icon: const Icon(Icons.close),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Choose the folder containing your inspection database. The granted access is saved for future launches.',
+                        'Wähle den Ordner mit deiner Prüfdatenbank. Der gewährte Zugriff wird für künftige Starts gespeichert.',
                         style: TextStyle(color: ViewerColors.muted),
                       ),
                       const SizedBox(height: 18),
-                      const Text(
-                        'Shared folder',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      const Text('Freigegebener Ordner', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 6),
                       SelectableText(
-                        controller.config.folder.isEmpty
-                            ? 'No folder selected yet'
-                            : controller.config.folder,
+                        controller.config.folder.isEmpty ? 'Noch kein Ordner ausgewählt' : controller.config.folder,
                         style: const TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 10),
@@ -402,15 +334,12 @@ Future<void> showSourceSettings(
                                   try {
                                     await controller.chooseFolder();
                                   } catch (exception) {
-                                    error = exception is PlatformException
-                                        ? exception.message
-                                        : exception.toString();
+                                    error = exception is PlatformException ? exception.message : exception.toString();
                                   }
-                                  if (context.mounted)
-                                    setState(() => working = false);
+                                  if (context.mounted) setState(() => working = false);
                                 },
                           icon: const Icon(Icons.folder_open),
-                          label: const Text('Choose folder'),
+                          label: const Text('Ordner auswählen'),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -421,17 +350,14 @@ Future<void> showSourceSettings(
                         autocorrect: false,
                         enableSuggestions: false,
                         decoration: const InputDecoration(
-                          labelText: 'File name or relative path',
+                          labelText: 'Dateiname oder relativer Pfad',
                           hintText: 'pcdrdata.sqlite3',
                         ),
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Examples: pcdrdata.sqlite3 or Inspections/pcdrdata.sqlite3. Data is always read from the shared folder, never from a permanently imported copy.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: ViewerColors.muted,
-                        ),
+                        'Beispiele: pcdrdata.sqlite3 oder Prüfungen/pcdrdata.sqlite3. Die Daten werden immer aus dem freigegebenen Ordner gelesen, nie aus einer dauerhaft importierten Kopie.',
+                        style: TextStyle(fontSize: 12, color: ViewerColors.muted),
                       ),
                       const SizedBox(height: 18),
                       Container(
@@ -441,23 +367,16 @@ Future<void> showSourceSettings(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
-                          'Finish and save the inspection, then open this viewer. If a journal warning appears, fully close the inspection app and refresh again. Never delete journal files.',
+                          'Beende und speichere die Prüfung und öffne danach diesen Viewer. Falls eine Journal-Warnung erscheint, schliesse die Prüf-App vollständig und aktualisiere erneut. Journal-Dateien niemals löschen.',
                           style: TextStyle(fontSize: 13),
                         ),
                       ),
                       if (error != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 14),
-                          child: Text(
-                            error!,
-                            style: const TextStyle(color: ViewerColors.overdue),
-                          ),
+                          child: Text(error!, style: const TextStyle(color: ViewerColors.overdue)),
                         ),
-                      if (working)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: LinearProgressIndicator(),
-                        ),
+                      if (working) const Padding(padding: EdgeInsets.only(top: 16), child: LinearProgressIndicator()),
                       const SizedBox(height: 20),
                       Wrap(
                         alignment: WrapAlignment.end,
@@ -465,10 +384,8 @@ Future<void> showSourceSettings(
                         runSpacing: 10,
                         children: [
                           OutlinedButton(
-                            onPressed: working
-                                ? null
-                                : () => Navigator.pop(context),
-                            child: const Text('Close'),
+                            onPressed: working ? null : () => Navigator.pop(context),
+                            child: const Text('Schliessen'),
                           ),
                           FilledButton(
                             onPressed: working || !controller.config.configured
@@ -479,9 +396,7 @@ Future<void> showSourceSettings(
                                       error = null;
                                     });
                                     try {
-                                      await controller.savePathAndRefresh(
-                                        path.text,
-                                      );
+                                      await controller.savePathAndRefresh(path.text);
                                       if (!context.mounted) return;
                                       if (controller.error == null) {
                                         Navigator.pop(context);
@@ -489,24 +404,18 @@ Future<void> showSourceSettings(
                                       }
                                       error = controller.error;
                                     } catch (exception) {
-                                      error = exception is PlatformException
-                                          ? exception.message
-                                          : exception.toString();
+                                      error = exception is PlatformException ? exception.message : exception.toString();
                                     }
-                                    if (context.mounted)
-                                      setState(() => working = false);
+                                    if (context.mounted) setState(() => working = false);
                                   },
-                            child: const Text('Save path & load'),
+                            child: const Text('Pfad speichern und laden'),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
                       const Text(
-                        'View only · No upload · No cloud connection',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: ViewerColors.muted,
-                        ),
+                        'Nur Lesen · Kein Upload · Keine Cloud-Verbindung',
+                        style: TextStyle(fontSize: 11, color: ViewerColors.muted),
                       ),
                     ],
                   ),
@@ -523,34 +432,30 @@ Future<void> showSourceSettings(
   }
 }
 
-Future<void> showDeviceDetails(
-  BuildContext context,
-  DeviceRecord device,
-  ViewerController controller,
-) async {
+Future<void> showDeviceDetails(BuildContext context, DeviceRecord device, ViewerController controller) async {
   final labels = <String, String>{
-    'CustomerNumber': 'Customer number',
-    'IDNumber': 'Device no.',
-    'Location': 'Location',
-    'DeviceDescription': 'Description',
-    'Manufacturer': 'Manufacturer',
-    'Type': 'Type',
-    'FactoryNumber': 'Serial number',
-    'Class': 'Protection class',
+    'CustomerNumber': 'Kundennummer',
+    'IDNumber': 'Gerätenr.',
+    'Location': 'Standort',
+    'DeviceDescription': 'Bezeichnung',
+    'Manufacturer': 'Hersteller',
+    'Type': 'Typ',
+    'FactoryNumber': 'Seriennummer',
+    'Class': 'Schutzklasse',
     'Standard': 'Standard',
-    'SubStandard': 'Additional standard',
-    'LastTest': 'Last inspection',
-    'NextTest': 'Next inspection',
-    'TestInterval': 'Inspection interval (original value)',
-    'TestResult': 'Result code',
-    'Status': 'Status code',
-    'User1': 'User field 1',
-    'User2': 'User field 2',
-    'User3': 'User field 3',
-    'Remark': 'Remark',
+    'SubStandard': 'Zusätzliche Norm',
+    'LastTest': 'Letzte Prüfung',
+    'NextTest': 'Nächste Prüfung',
+    'TestInterval': 'Prüfintervall (Originalwert)',
+    'TestResult': 'Ergebniscode',
+    'Status': 'Statuscode',
+    'User1': 'Benutzerfeld 1',
+    'User2': 'Benutzerfeld 2',
+    'User3': 'Benutzerfeld 3',
+    'Remark': 'Bemerkung',
   };
   final fields = <MapEntry<String, String>>[
-    MapEntry('Customer', device.customerName),
+    MapEntry('Kunde', device.customerName),
     ...labels.entries.map(
       (entry) => MapEntry(
         entry.value,
@@ -577,13 +482,10 @@ Future<void> showDeviceDetails(
                 Row(
                   children: [
                     Expanded(
-                      child: SectionTitle(
-                        label: 'Device ${device.id}',
-                        title: device.description,
-                      ),
+                      child: SectionTitle(label: 'Gerät ${device.id}', title: device.description),
                     ),
                     IconButton(
-                      tooltip: 'Close',
+                      tooltip: 'Schliessen',
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close),
                     ),
@@ -593,54 +495,34 @@ Future<void> showDeviceDetails(
                 Align(
                   alignment: Alignment.centerLeft,
                   child: StatusBadge(
-                    text: dueLabel(
-                      device.due(controller.reference),
-                      manual: controller.filters.manualDate != null,
-                    ),
+                    text: dueLabel(device.due(controller.reference), manual: controller.filters.manualDate != null),
                     color: dueColor(device.due(controller.reference)),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  device.daysLabel(
-                    controller.reference,
-                    manual: controller.filters.manualDate != null,
-                  ),
+                  device.daysLabel(controller.reference, manual: controller.filters.manualDate != null),
                   style: const TextStyle(color: ViewerColors.muted),
                 ),
                 const SizedBox(height: 20),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final width = constraints.maxWidth >= 550
-                        ? (constraints.maxWidth - 24) / 2
-                        : constraints.maxWidth;
+                    final width = constraints.maxWidth >= 550 ? (constraints.maxWidth - 24) / 2 : constraints.maxWidth;
                     return Wrap(
                       spacing: 24,
                       runSpacing: 16,
                       children: [
                         for (final field in fields)
                           SizedBox(
-                            width: field.key == 'Remark'
-                                ? constraints.maxWidth
-                                : width,
+                            width: field.key == 'Remark' ? constraints.maxWidth : width,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  field.key,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: ViewerColors.muted,
-                                  ),
-                                ),
+                                Text(field.key, style: const TextStyle(fontSize: 12, color: ViewerColors.muted)),
                                 const SizedBox(height: 4),
                                 SelectableText(
-                                  field.value.trim().isEmpty
-                                      ? '—'
-                                      : field.value,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  field.value.trim().isEmpty ? '—' : field.value,
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),
@@ -651,16 +533,13 @@ Future<void> showDeviceDetails(
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Unique identity: customer number + device no. · View only, no editing',
+                  'Eindeutige Identität: Kundennummer + Gerätenr. · Nur Lesen, keine Bearbeitung',
                   style: TextStyle(fontSize: 11, color: ViewerColors.muted),
                 ),
                 const SizedBox(height: 18),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
-                  ),
+                  child: FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Schliessen')),
                 ),
               ],
             ),

@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Set-Location $PSScriptRoot
-if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) { throw 'Flutter is not on PATH. Install Flutter 3.44.9 and reopen PowerShell.' }
+if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) { throw 'Flutter is not on PATH. Install Flutter 3.47.2 and reopen PowerShell.' }
 function Invoke-Flutter {
     param([string[]]$Arguments)
     & flutter @Arguments

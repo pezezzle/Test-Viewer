@@ -2,7 +2,7 @@
 
 ## Android
 
-The Android release uses application ID `com.pezezzle.testmasterviewer`, version `2.0.0`, and version code `6`. Updating an earlier installation requires the same private signing key. The key is deliberately **not** stored in this repository. Restore it only to a secure local location, copy `android/key.properties.example` to the ignored `android/key.properties`, and enter the real local values.
+The next Android release uses application ID `com.pezezzle.testmasterviewer`, version `2.0.1`, and version code `7`. Updating an earlier installation requires the same private signing key. The key is deliberately **not** stored in this repository. Restore it only to a secure local location, copy `android/key.properties.example` to the ignored `android/key.properties`, and enter the real local values.
 
 When the application ID and signature match, an update retains the previous Android folder grant stored in SharedPreferences under `viewer`, `tree`, and `path`. Filters previously stored by the WebView are **not** migrated; locations, page size, and reference date can be configured again. A correctly signed update does not require uninstalling the existing app.
 
@@ -22,23 +22,13 @@ Optionally create a protected GitHub environment named **android-release** with 
 
 `.github/workflows/android-release.yml` is manual-only. It produces signed APK/AAB artifacts but does not create a public GitHub release or upload anything to an app store.
 
-## iOS
-
-The bundle ID is `com.pezezzle.testmasterviewer`, with iOS 15 as the deployment target. Open `ios/Runner.xcworkspace` and select your team under **Signing & Capabilities**. No third-party team or certificate is preconfigured. Flutter creates plugin registration and SDK configuration on the first `pub get`/build.
-
-`bash tool/build.sh ios-simulator` creates an unsigned simulator build. `bash tool/build.sh ios-archive` runs `flutter build ipa --release` and requires valid signing owned by the publisher. The CI simulator artifact cannot be installed on an iPhone or submitted to the App Store as an IPA.
-
-Before submission, verify persistent folder access, access after a device restart, the actual file provider, privacy manifest, app icon, and device orientations. The publisher must provide the Apple team, store listing, legal information, and usage rights. The included synthetic demo provides a reproducible review path.
-
 ## Project toolchain
 
-Flutter is pinned to 3.44.9. Android uses Gradle 9.1.0, AGP 9.0.1, Java 17, and minSdk 26. The two AGP 9 compatibility switches match the Flutter 3.44.9 template. `pubspec.lock` records the verified dependency state and is committed.
+Flutter is pinned to 3.47.2. Android uses Gradle 9.1.0, AGP 9.0.1, Java 17, and minSdk 26. The two AGP 9 compatibility switches match the Flutter 3.47.2 template. `pubspec.lock` records the verified dependency state and is committed.
 
 Implementation references:
 
 - https://docs.flutter.dev/platform-integration/platform-channels
 - https://docs.flutter.dev/deployment/android
-- https://docs.flutter.dev/deployment/ios
-- https://github.com/flutter/flutter/tree/3.44.9/packages/flutter_tools/templates/app
+- https://github.com/flutter/flutter/tree/3.47.2/packages/flutter_tools/templates/app
 - https://developer.android.com/training/data-storage/shared/documents-files
-- https://developer.apple.com/documentation/uikit/uidocumentpickerviewcontroller

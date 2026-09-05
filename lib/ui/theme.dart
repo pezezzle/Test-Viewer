@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../domain/device.dart';
 
 class ViewerColors {
@@ -33,26 +34,14 @@ Color dueColor(DueStatus status) {
 
 ThemeData viewerTheme() => ThemeData(
   useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: ViewerColors.brand,
-    brightness: Brightness.light,
-    surface: Colors.white,
-  ),
+  colorScheme: ColorScheme.fromSeed(seedColor: ViewerColors.brand, brightness: Brightness.light, surface: Colors.white),
   scaffoldBackgroundColor: ViewerColors.background,
   visualDensity: VisualDensity.standard,
   textTheme: const TextTheme(
     bodyMedium: TextStyle(color: ViewerColors.ink, fontSize: 14),
     bodySmall: TextStyle(color: ViewerColors.muted, fontSize: 12),
-    titleLarge: TextStyle(
-      color: ViewerColors.ink,
-      fontSize: 22,
-      fontWeight: FontWeight.w600,
-    ),
-    titleMedium: TextStyle(
-      color: ViewerColors.ink,
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-    ),
+    titleLarge: TextStyle(color: ViewerColors.ink, fontSize: 22, fontWeight: FontWeight.w600),
+    titleMedium: TextStyle(color: ViewerColors.ink, fontSize: 16, fontWeight: FontWeight.w600),
   ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
@@ -89,11 +78,7 @@ ThemeData viewerTheme() => ThemeData(
 class Panel extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  const Panel({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.all(20),
-  });
+  const Panel({super.key, required this.child, this.padding = const EdgeInsets.all(20)});
   @override
   Widget build(BuildContext context) => Container(
     decoration: BoxDecoration(
@@ -110,12 +95,7 @@ class SectionTitle extends StatelessWidget {
   final String label;
   final String title;
   final String subtitle;
-  const SectionTitle({
-    super.key,
-    required this.label,
-    required this.title,
-    this.subtitle = '',
-  });
+  const SectionTitle({super.key, required this.label, required this.title, this.subtitle = ''});
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,10 +126,7 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(6),
-    ),
+    decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
     child: Text(
       text,
       style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600),

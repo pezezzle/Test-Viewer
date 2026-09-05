@@ -16,17 +16,6 @@ android/local.properties
 android/gradlew
 android/gradlew.bat
 android/gradle/wrapper/gradle-wrapper.jar
-ios/Pods/
-ios/.symlinks/
-ios/Flutter/ephemeral/
-ios/Flutter/Generated.xcconfig
-ios/Flutter/flutter_export_environment.sh
-ios/Flutter/Flutter.framework/
-ios/Flutter/App.framework/
-ios/Runner/GeneratedPluginRegistrant.*
-ios/**/xcuserdata/
-ios/**/UserInterfaceState.xcuserstate
-ios/Flutter/Flutter.podspec
 # Secrets and private data must never enter the public repository
 signing/
 android/key.properties

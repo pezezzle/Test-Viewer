@@ -4,16 +4,16 @@
 [![Release downloads](https://img.shields.io/github/downloads/pezezzle/Test-Viewer/total?label=downloads)](https://github.com/pezezzle/Test-Viewer/releases)
 [![Validate and build](https://github.com/pezezzle/Test-Viewer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pezezzle/Test-Viewer/actions/workflows/ci.yml)
 [![Last commit](https://img.shields.io/github/last-commit/pezezzle/Test-Viewer/main)](https://github.com/pezezzle/Test-Viewer/commits/main)
-[![Flutter 3.44.9](https://img.shields.io/badge/Flutter-3.44.9-02569B?logo=flutter&logoColor=white)](https://docs.flutter.dev/)
+[![Flutter 3.47.2](https://img.shields.io/badge/Flutter-3.47.2-02569B?logo=flutter&logoColor=white)](https://docs.flutter.dev/)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/pezezzle/Test-Viewer/releases/latest)
 
-Offline companion app for Test-Master inspection data on Android and iOS. Version **2.0.0+6**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**. The current user interface and bundled documentation are English-only.
+Offline Android companion app for Test-Master inspection data. Development version **2.0.1+7**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**. The user interface is German, while source comments, tests, and documentation are English.
 
-**Project status:** Flutter analysis and all 51 logic/widget tests pass. The Android debug APK and the production-signed Android release APK have been built locally; the release signature and certificate fingerprint were independently verified. The production-signed Android App Bundle and the iOS app build have not yet been fully verified. Building iOS requires macOS with Xcode. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
+**Project status:** Flutter analysis, all 51 logic/widget tests, and the Android emulator integration test pass with Flutter 3.47.2. The Android debug APK and production-signed Android release APK have been built locally; the release signature and certificate fingerprint were independently verified. The project is Android-only. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
 
 ## Getting started
 
-Open the folder containing `pubspec.yaml` in Android Studio with the Flutter plugin or in VS Code. The supported toolchain is **Flutter 3.44.9 / Dart 3.12**; `.fvmrc` pins the Flutter version. Android uses JDK 17.
+Open the folder containing `pubspec.yaml` in Android Studio with the Flutter plugin or in VS Code. The supported toolchain is **Flutter 3.47.2 / Dart 3.13**; `.fvmrc` pins the Flutter version. Android uses JDK 17.
 
 ```sh
 flutter pub get
@@ -22,13 +22,13 @@ flutter test
 flutter run
 ```
 
-Select **Try with sample data** on the welcome screen to explore the app without your own database. Alternatively:
+Select **Mit fiktiven Daten ausprobieren** on the welcome screen to explore the app without your own database. Alternatively:
 
 ```sh
 flutter run --dart-define=DEMO_MODE=true
 ```
 
-The app targets Android 8.0+ and iOS 15+. Android debug builds use standard debug signing. Android release/store builds require the publisher's private signing key, while physical-device and App Store builds for iOS require the publisher's Apple Developer team.
+The app targets Android 8.0+. Debug builds use standard debug signing. Release and store builds require the publisher's private signing key.
 
 ## Download
 
@@ -60,15 +60,15 @@ The task runs entirely on the local computer. It does not invoke Git, contact Gi
 
 **Dashboard:** Customer title from `tblCustomer.Name`, six summary metrics, a due-date breakdown, the eight locations with the largest backlogs, and an interactive monthly forecast. The forecast horizon can be 12, 24, 36, 48, or 60 months. It starts on the reference date, includes its partial month, and does not count already overdue inspections again.
 
-**Devices:** Search, multi-location selection, location search, result and due-date filters, natural numeric sorting, and device details. Wide displays use a table; narrow displays use a card list. The default page size is 25, with 5, 10, 25, 50, and 100 available. The whole page scrolls vertically instead of using a constrained table area.
+**Geräte:** Search, multi-location selection, location search, result and due-date filters, natural numeric sorting, and device details. Wide displays use a table; narrow displays use a card list. The default page size is 25, with 5, 10, 25, 50, and 100 available. The whole page scrolls vertically instead of using a constrained table area.
 
-**Reference date:** Either the current local date or a saved manual date. **Today · automatic** switches back to the current date. Settings persist. Customer names come from the database and are not hard-coded branding.
+**Stichtag:** Either the current local date or a saved manual date. **Heute · automatisch** switches back to the current date. Settings persist. Customer names come from the database and are not hard-coded branding.
 
 ## Connecting a database
 
-Select **Database** → **Choose folder** → grant access → enter a file name or relative path → **Save path & load**.
+Select **Datenbank** → **Ordner auswählen** → grant access → enter a file name or relative path → **Pfad speichern und laden**.
 
-The default file is `pcdrdata.sqlite3`. A subfolder path such as `Inspections/pcdrdata.sqlite3` is supported. Absolute paths and `..` are deliberately rejected. Android stores a Storage Access Framework folder grant; iOS stores a document-picker bookmark. The app reads the selected source at startup, when returning to the foreground, and when **Refresh** is selected.
+The default file is `pcdrdata.sqlite3`. A subfolder path such as `Inspections/pcdrdata.sqlite3` is supported. Absolute paths and `..` are deliberately rejected. Android stores a Storage Access Framework folder grant. The app reads the selected source at startup, when returning to the foreground, and when **Aktualisieren** is selected.
 
 SQLite opens only a private temporary read copy. The source file is never modified. Active WAL/journal files, mismatched hashes between two read passes, and inconsistent databases produce a clear error. Finish and save the inspection, close the inspection app, and refresh; never delete journal files. Data retained after a load failure is explicitly marked as stale.
 
@@ -89,19 +89,19 @@ macOS/Linux:
 
 ```sh
 bash tool/build.sh android-debug
-bash tool/build.sh ios-simulator
-bash tool/build.sh ios-archive
+bash tool/build.sh android-release
+bash tool/build.sh appbundle
 ```
 
-The scripts run `flutter analyze` and `flutter test` before building and stop on failure. Flutter generates the Android Gradle wrapper, `local.properties`, `Generated.xcconfig`, and plugin registration when required. Do not run `flutter create` over the existing platform folders.
+The scripts run `flutter analyze` and `flutter test` before building and stop on failure. Flutter generates the Android Gradle wrapper, `local.properties`, and plugin registration when required. Do not run `flutter create` over the existing Android platform folder.
 
-**Release ID:** `com.pezezzle.testmasterviewer` on both platforms. Android debug builds deliberately use `com.pezezzle.testmasterviewer.debug`, allowing them to coexist with an installed release signed by a different key.
+**Release ID:** `com.pezezzle.testmasterviewer`. Android debug builds deliberately use `com.pezezzle.testmasterviewer.debug`, allowing them to coexist with an installed release signed by a different key.
 
 ## GitHub repository
 
 The source is stored in the public repository `pezezzle/Test-Viewer`. Local changes must be reviewed and explicitly approved before they are committed, pushed, or published. Build artifacts are not added to the Git repository.
 
-GitHub Actions includes validation, an Android debug build, an iOS simulator build, and a manually triggered signed Android build. Simulator and debug artifacts are not store releases. Release secrets must only be configured through protected GitHub environment secrets.
+GitHub Actions includes validation, an Android debug build, and a manually triggered signed Android build. Debug artifacts are not store releases. Release secrets must only be configured through protected GitHub environment secrets.
 
 Approved production APKs are attached to GitHub Releases as public download assets.
 

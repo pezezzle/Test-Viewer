@@ -27,7 +27,7 @@ def create_database(target: Path, reference: dt.date) -> None:
         for index in range(80):
             customer = '0001' if index < 65 else '0002'
             next_date = None if index % 17 == 0 else (reference + dt.timedelta(days=-60 if index % 9 == 0 else index * 27 - 25)).isoformat()
-            rows.append((customer, f'{index:06}', ['Workshop', 'Kitchen', 'Room 2', 'Room 10', '', 'Building A / Floor 1'][index % 6], ['Power drill', 'Fan', 'Monitor', 'Coffee machine', 'Vacuum cleaner'][index % 5], 'Sample Manufacturer', f'Model {index % 4 + 1}', 'I', 'DEMO', f'DEMO-{index}', (reference - dt.timedelta(days=365)).isoformat(), next_date, 12, 'F' if index % 23 == 0 else 'OK', 'Synthetic sample data, not for inspection decisions.', 0, None, None, None, 0))
+            rows.append((customer, f'{index:06}', ['Werkstatt', 'Küche', 'Raum 2', 'Raum 10', '', 'Gebäude A / Etage 1'][index % 6], ['Bohrmaschine', 'Ventilator', 'Monitor', 'Kaffeemaschine', 'Staubsauger'][index % 5], 'Musterhersteller', f'Modell {index % 4 + 1}', 'I', 'DEMO', f'DEMO-{index}', (reference - dt.timedelta(days=365)).isoformat(), next_date, 12, 'F' if index % 23 == 0 else 'OK', 'Fiktive Beispieldaten, nicht für Prüfentscheidungen verwenden.', 0, None, None, None, 0))
         connection.executemany('INSERT INTO tblIDNumbers VALUES (' + ','.join('?' for _ in range(19)) + ')', rows)
         connection.commit()
     finally:

@@ -20,7 +20,7 @@ if ($LASTEXITCODE -eq 0) { throw "Repository $repository already exists. Nothing
 $hadRepository = Test-Path '.git'
 if (-not $hadRepository) { Invoke-Git @('init', '-b', 'main') }
 # Stage only source roots. Ignored keys, databases and generated outputs stay private.
-$allowed = @('.github', '.metadata', '.fvmrc', '.gitattributes', '.gitignore', '.vscode', 'analysis_options.yaml', 'android', 'assets', 'ios', 'lib', 'test', 'integration_test', 'tool', 'docs', 'example', 'pubspec.yaml', 'README.md', 'CHANGELOG.md', 'Build.ps1', 'Publish-ToGitHub.ps1', 'SECURITY.md')
+$allowed = @('.github', '.metadata', '.fvmrc', '.gitattributes', '.gitignore', '.vscode', 'analysis_options.yaml', 'android', 'assets', 'lib', 'test', 'integration_test', 'tool', 'docs', 'example', 'pubspec.yaml', 'README.md', 'CHANGELOG.md', 'Build.ps1', 'Publish-ToGitHub.ps1', 'SECURITY.md')
 if (Test-Path 'pubspec.lock') { $allowed += 'pubspec.lock' }
 Invoke-Git (@('add', '--') + $allowed)
 $tracked = @(& git ls-files)

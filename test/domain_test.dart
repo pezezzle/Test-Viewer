@@ -51,22 +51,8 @@ void main() {
       }
     });
     test('Uses calendar days across spring and autumn DST changes', () {
-      expect(
-        const CalendarDay(
-          2026,
-          3,
-          30,
-        ).difference(const CalendarDay(2026, 3, 28)),
-        2,
-      );
-      expect(
-        const CalendarDay(
-          2026,
-          10,
-          26,
-        ).difference(const CalendarDay(2026, 10, 24)),
-        2,
-      );
+      expect(const CalendarDay(2026, 3, 30).difference(const CalendarDay(2026, 3, 28)), 2);
+      expect(const CalendarDay(2026, 10, 26).difference(const CalendarDay(2026, 10, 24)), 2);
     });
     test('Reference date bounds are explicit', () {
       expect(CalendarDay.parseReference('1899-12-31'), isNull);
@@ -75,10 +61,7 @@ void main() {
       expect(CalendarDay.parseReference('2026-09-05T12:00'), isNull);
     });
     test('Moves through year boundaries and formats dates and counts', () {
-      expect(
-        const CalendarDay(2026, 12, 31).monthStart(1),
-        const CalendarDay(2027, 1, 1),
-      );
+      expect(const CalendarDay(2026, 12, 31).monthStart(1), const CalendarDay(2027, 1, 1));
       expect(reference.display, '05.09.2026');
       expect(formatCount(1525), '1’525');
     });
@@ -95,8 +78,8 @@ void main() {
       expect(a.customerName, 'Example company');
     });
     test('Falls back to customer numbers, never fixed branding', () {
-      expect(DeviceRecord.resolveCustomer('0042', {}), 'Customer 0042');
-      expect(DeviceRecord.resolveCustomer('', {}), 'Customer not specified');
+      expect(DeviceRecord.resolveCustomer('0042', {}), 'Kunde 0042');
+      expect(DeviceRecord.resolveCustomer('', {}), 'Kunde nicht angegeben');
     });
     test('Normalizes search accents and multiple tokens', () {
       expect(normalizeSearch('ÄÖÜß'), 'aouss');
@@ -117,10 +100,7 @@ void main() {
       91: DueStatus.later,
     }.entries) {
       test('Classifies due boundary ${entry.key} days', () {
-        expect(
-          device('1', next: offset(entry.key)).due(reference),
-          entry.value,
-        );
+        expect(device('1', next: offset(entry.key)).due(reference), entry.value);
       });
     }
     test('Does not infer a missing or invalid date', () {
@@ -144,29 +124,15 @@ void main() {
 
   group('Filtering and sorting', () {
     final records = [
-      device(
-        '1',
-        next: offset(-1),
-        location: 'Kitchen',
-        description: 'Monitor A',
-        result: 'F',
-      ),
-      device(
-        '2',
-        next: offset(0),
-        location: 'Room 2',
-        description: 'Monitor B',
-      ),
+      device('1', next: offset(-1), location: 'Kitchen', description: 'Monitor A', result: 'F'),
+      device('2', next: offset(0), location: 'Room 2', description: 'Monitor B'),
       device('10', next: offset(30), location: 'Room 10', result: ''),
       device('3', next: offset(31), location: '', result: 'P'),
       device('4', next: 'invalid', location: 'Room 2'),
     ];
     test('Combines multiple locations using OR', () {
       final filters = ViewerFilters(locations: {'Kitchen', 'Room 10'});
-      expect(filterDevices(records, filters, reference).map((row) => row.id), [
-        '1',
-        '10',
-      ]);
+      expect(filterDevices(records, filters, reference).map((row) => row.id), ['1', '10']);
     });
     test('Supports an explicitly selected empty location', () {
       expect(scopeDevices(records, {''}).single.id, '3');
@@ -177,54 +143,20 @@ void main() {
       expect(filterDevices(records, filters, reference).single.id, '1');
     });
     test('Search includes customer names', () {
-      final filters = ViewerFilters(
-        search: 'example company',
-        locations: {'Kitchen'},
-      );
+      final filters = ViewerFilters(search: 'example company', locations: {'Kitchen'});
       expect(filterDevices(records, filters, reference).single.id, '1');
     });
     test('Upcoming 30 days include today and exclude day 31', () {
-      expect(
-        filterDevices(
-          records,
-          ViewerFilters(due: 'soon'),
-          reference,
-        ).map((row) => row.id),
-        ['2', '10'],
-      );
+      expect(filterDevices(records, ViewerFilters(due: 'soon'), reference).map((row) => row.id), ['2', '10']);
     });
     test('Raw result groups remain distinct', () {
-      expect(
-        filterDevices(records, ViewerFilters(result: 'F'), reference).single.id,
-        '1',
-      );
-      expect(
-        filterDevices(
-          records,
-          ViewerFilters(result: 'empty'),
-          reference,
-        ).single.id,
-        '10',
-      );
-      expect(
-        filterDevices(
-          records,
-          ViewerFilters(result: 'other'),
-          reference,
-        ).single.id,
-        '3',
-      );
+      expect(filterDevices(records, ViewerFilters(result: 'F'), reference).single.id, '1');
+      expect(filterDevices(records, ViewerFilters(result: 'empty'), reference).single.id, '10');
+      expect(filterDevices(records, ViewerFilters(result: 'other'), reference).single.id, '3');
     });
     test('Invalid dates remain at the bottom in both directions', () {
       for (final descending in [false, true]) {
-        expect(
-          filterDevices(
-            records,
-            ViewerFilters(descending: descending),
-            reference,
-          ).last.id,
-          '4',
-        );
+        expect(filterDevices(records, ViewerFilters(descending: descending), reference).last.id, '4');
       }
     });
     test('Rejects invalid persisted settings and respects page bounds', () {
@@ -256,18 +188,14 @@ void main() {
         horizonMonths: 60,
         manualDate: reference,
       );
-      expect(
-        ViewerFilters.fromJson(original.toJson()).toJson(),
-        original.toJson(),
-      );
+      expect(ViewerFilters.fromJson(original.toJson()).toJson(), original.toJson());
     });
   });
 
   group('Dashboard calculations', () {
     test('Partitions every device exactly once', () {
       final rows = [
-        for (final days in [-1, 0, 30, 31, 91])
-          device('$days', next: offset(days)),
+        for (final days in [-1, 0, 30, 31, 91]) device('$days', next: offset(days)),
         device('missing', result: 'F'),
       ];
       final counts = DashboardCounts.fromDevices(rows, reference);
@@ -276,53 +204,33 @@ void main() {
       expect(counts.soon, 2);
       expect(counts.failed, 1);
     });
-    test(
-      'Forecast excludes overdue rows and preserves partial current month',
-      () {
-        final rows = [
-          device('past', next: '2026-09-04'),
-          device('today', next: '2026-09-05'),
-          device('end', next: '2026-09-30'),
-          device('next', next: '2026-10-01'),
-          device('outside', next: '2027-09-01'),
-          device('missing'),
-        ];
-        final values = forecast(rows, reference, 12);
-        expect(values.length, 12);
-        expect(values.first.count, 2);
-        expect(values[1].count, 1);
-        expect(values.last.start.monthKey, '2027-08');
-        expect(values.fold<int>(0, (total, value) => total + value.count), 3);
-        expect(
-          filterDevices(
-            rows,
-            ViewerFilters(month: '2026-09'),
-            reference,
-          ).map((row) => row.id),
-          ['today', 'end'],
-        );
-      },
-    );
+    test('Forecast excludes overdue rows and preserves partial current month', () {
+      final rows = [
+        device('past', next: '2026-09-04'),
+        device('today', next: '2026-09-05'),
+        device('end', next: '2026-09-30'),
+        device('next', next: '2026-10-01'),
+        device('outside', next: '2027-09-01'),
+        device('missing'),
+      ];
+      final values = forecast(rows, reference, 12);
+      expect(values.length, 12);
+      expect(values.first.count, 2);
+      expect(values[1].count, 1);
+      expect(values.last.start.monthKey, '2027-08');
+      expect(values.fold<int>(0, (total, value) => total + value.count), 3);
+      expect(filterDevices(rows, ViewerFilters(month: '2026-09'), reference).map((row) => row.id), ['today', 'end']);
+    });
     for (final months in horizons) {
       test('Produces precisely $months forecast buckets', () {
         expect(forecast([], reference, months).length, months);
       });
     }
     test('Forecast and clicked month respect location scope', () {
-      final rows = [
-        device('a', next: offset(1), location: 'A'),
-        device('b', next: offset(1), location: 'B'),
-      ];
+      final rows = [device('a', next: offset(1), location: 'A'), device('b', next: offset(1), location: 'B')];
       final scope = scopeDevices(rows, {'A'});
       expect(forecast(scope, reference, 12).first.count, 1);
-      expect(
-        filterDevices(
-          rows,
-          ViewerFilters(locations: {'A'}, month: '2026-09'),
-          reference,
-        ).single.id,
-        'a',
-      );
+      expect(filterDevices(rows, ViewerFilters(locations: {'A'}, month: '2026-09'), reference).single.id, 'a');
     });
   });
 }

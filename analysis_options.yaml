@@ -1,6 +1,7 @@
 analyzer:
   exclude:
     - build/**
+    - android/**
   language:
     strict-casts: true
     strict-inference: true
@@ -14,3 +15,5 @@ linter:
     - prefer_final_fields
     - unawaited_futures
     - use_build_context_synchronously
+formatter:
+  page_width: 120

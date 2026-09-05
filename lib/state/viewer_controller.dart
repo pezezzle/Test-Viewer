@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
 import '../data/platform_store.dart';
 import '../domain/calendar_day.dart';
 import '../domain/device.dart';
@@ -28,38 +30,22 @@ class ViewerController extends ChangeNotifier {
   Future<void> _saveQueue = Future<void>.value();
   String _lastSource = '';
 
-  ViewerController({
-    required this.store,
-    DateTime Function()? clock,
-    this.demo = false,
-  }) : clock = clock ?? DateTime.now;
+  ViewerController({required this.store, DateTime Function()? clock, this.demo = false})
+    : clock = clock ?? DateTime.now;
   CalendarDay get reference => filters.reference(clock());
-  List<DeviceRecord> get scope =>
-      scopeDevices(snapshot?.devices ?? [], filters.locations);
-  List<DeviceRecord> get filtered =>
-      filterDevices(snapshot?.devices ?? [], filters, reference);
-  int get totalPages =>
-      ((filtered.length + filters.pageSize - 1) ~/ filters.pageSize)
-          .clamp(1, 1 << 30)
-          .toInt();
+  List<DeviceRecord> get scope => scopeDevices(snapshot?.devices ?? [], filters.locations);
+  List<DeviceRecord> get filtered => filterDevices(snapshot?.devices ?? [], filters, reference);
+  int get totalPages => ((filtered.length + filters.pageSize - 1) ~/ filters.pageSize).clamp(1, 1 << 30).toInt();
   List<DeviceRecord> get pageRows {
     final rows = filtered;
     page = page
-        .clamp(
-          0,
-          ((rows.length + filters.pageSize - 1) ~/ filters.pageSize - 1)
-              .clamp(0, 1 << 30)
-              .toInt(),
-        )
+        .clamp(0, ((rows.length + filters.pageSize - 1) ~/ filters.pageSize - 1).clamp(0, 1 << 30).toInt())
         .toInt();
     return rows.skip(page * filters.pageSize).take(filters.pageSize).toList();
   }
 
   List<String> get locations {
-    final values = (snapshot?.devices ?? [])
-        .map((device) => device.location)
-        .toSet()
-        .toList();
+    final values = (snapshot?.devices ?? []).map((device) => device.location).toSet().toList();
     values.sort(
       (a, b) => a.isEmpty
           ? (b.isEmpty ? 0 : 1)
@@ -74,14 +60,12 @@ class ViewerController extends ChangeNotifier {
     final data = snapshot;
     if (data == null) return 'Test Viewer';
     final records = scope;
-    final numbers = (records.isEmpty ? data.devices : records)
-        .map((device) => device.customerNumber)
-        .toSet();
+    final numbers = (records.isEmpty ? data.devices : records).map((device) => device.customerNumber).toSet();
     if (numbers.isEmpty) numbers.addAll(data.customers.keys);
     return numbers.length == 1
         ? DeviceRecord.resolveCustomer(numbers.first, data.customers)
         : numbers.length > 1
-        ? '${formatCount(numbers.length)} customers'
+        ? '${formatCount(numbers.length)} Kunden'
         : 'Test Viewer';
   }
 
@@ -100,10 +84,7 @@ class ViewerController extends ChangeNotifier {
     if (_disposed) return;
     initialized = true;
     _lastDay = reference;
-    _dayTimer = Timer.periodic(
-      const Duration(seconds: 20),
-      (_) => synchronizeDay(),
-    );
+    _dayTimer = Timer.periodic(const Duration(seconds: 20), (_) => synchronizeDay());
     _notify();
     if (config.configured) await refresh();
   }
@@ -119,8 +100,7 @@ class ViewerController extends ChangeNotifier {
 
   Future<void> resume() async {
     synchronizeDay();
-    if (initialized && suspendAutoRefresh == 0 && config.configured && !busy)
-      await refresh();
+    if (initialized && suspendAutoRefresh == 0 && config.configured && !busy) await refresh();
   }
 
   Future<void> refresh() async {
@@ -213,12 +193,7 @@ class ViewerController extends ChangeNotifier {
     changed();
   }
 
-  void openFiltered({
-    String due = '*',
-    String result = '*',
-    String? location,
-    String month = '',
-  }) {
+  void openFiltered({String due = '*', String result = '*', String? location, String month = ''}) {
     filters.search = '';
     filters.due = due;
     filters.result = result;
@@ -230,9 +205,7 @@ class ViewerController extends ChangeNotifier {
 
   void sortBy(String field) {
     if (!sortFields.contains(field)) return;
-    filters.descending = filters.sortField == field
-        ? !filters.descending
-        : false;
+    filters.descending = filters.sortField == field ? !filters.descending : false;
     filters.sortField = field;
     changed();
   }
@@ -243,17 +216,10 @@ class ViewerController extends ChangeNotifier {
   }
 
   void _persist() {
-    final value = {
-      ...filters.toJson(),
-      'tab': tab == 1 ? 'devices' : 'dashboard',
-      'sourceIdentity': config.identity,
-    };
-    _saveQueue = _saveQueue.then((_) => store.saveSettings(value)).catchError((
-      Object exception,
-    ) {
+    final value = {...filters.toJson(), 'tab': tab == 1 ? 'devices' : 'dashboard', 'sourceIdentity': config.identity};
+    _saveQueue = _saveQueue.then((_) => store.saveSettings(value)).catchError((Object exception) {
       if (!_disposed) {
-        persistenceWarning =
-            'The settings could not be saved: ${_message(exception)}';
+        persistenceWarning = 'Die Einstellungen konnten nicht gespeichert werden: ${_message(exception)}';
         _notify();
       }
     });
@@ -261,9 +227,9 @@ class ViewerController extends ChangeNotifier {
 
   Future<void> flushSettings() => _saveQueue;
   String _message(Object exception) => exception is PlatformException
-      ? exception.message ?? 'Database access failed.'
+      ? exception.message ?? 'Der Datenbankzugriff ist fehlgeschlagen.'
       : exception is MissingPluginException
-      ? 'File access is available only in Android or iOS builds.'
+      ? 'Der Dateizugriff ist nur in Android-Builds verfügbar.'
       : exception.toString();
   void _notify() {
     if (!_disposed) notifyListeners();

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
 import '../domain/calendar_day.dart';
 import '../domain/device.dart';
 import '../domain/filters.dart';
@@ -15,65 +17,50 @@ class DashboardView extends StatelessWidget {
     final scope = controller.scope;
     final counts = DashboardCounts.fromDevices(scope, controller.reference);
     final manual = controller.filters.manualDate != null;
-    final cards =
-        <
-          ({
-            String title,
-            int count,
-            String subtitle,
-            Color color,
-            VoidCallback action,
-          })
-        >[
-          (
-            title: 'Devices in inventory',
-            count: counts.total,
-            subtitle: 'In the selected scope',
-            color: ViewerColors.brand,
-            action: () => controller.openFiltered(),
-          ),
-          (
-            title: 'Overdue',
-            count: counts[DueStatus.overdue],
-            subtitle: manual
-                ? 'Inspection due before the reference date'
-                : 'Inspection due before today',
-            color: ViewerColors.overdue,
-            action: () => controller.openFiltered(due: 'overdue'),
-          ),
-          (
-            title: 'Due within 30 days',
-            count: counts.soon,
-            subtitle: manual
-                ? 'Including the reference date'
-                : 'Including today',
-            color: ViewerColors.soon,
-            action: () => controller.openFiltered(due: 'soon'),
-          ),
-          (
-            title: 'Due in 31–90 days',
-            count: counts[DueStatus.medium],
-            subtitle: 'Next planning period',
-            color: ViewerColors.medium,
-            action: () => controller.openFiltered(due: 'medium'),
-          ),
-          (
-            title: 'No valid due date',
-            count: counts[DueStatus.missing],
-            subtitle: 'Check in the inspection app',
-            color: ViewerColors.missing,
-            action: () => controller.openFiltered(due: 'missing'),
-          ),
-          (
-            title: 'Result code F',
-            count: counts.failed,
-            subtitle: 'Current device record',
-            color: counts.failed > 0
-                ? ViewerColors.overdue
-                : ViewerColors.brand,
-            action: () => controller.openFiltered(result: 'F'),
-          ),
-        ];
+    final cards = <({String title, int count, String subtitle, Color color, VoidCallback action})>[
+      (
+        title: 'Geräte im Bestand',
+        count: counts.total,
+        subtitle: 'Im ausgewählten Bereich',
+        color: ViewerColors.brand,
+        action: () => controller.openFiltered(),
+      ),
+      (
+        title: 'Überfällig',
+        count: counts[DueStatus.overdue],
+        subtitle: manual ? 'Prüftermin vor dem Stichtag' : 'Prüftermin vor heute',
+        color: ViewerColors.overdue,
+        action: () => controller.openFiltered(due: 'overdue'),
+      ),
+      (
+        title: 'Bis in 30 Tagen fällig',
+        count: counts.soon,
+        subtitle: manual ? 'Einschliesslich Stichtag' : 'Einschliesslich heute',
+        color: ViewerColors.soon,
+        action: () => controller.openFiltered(due: 'soon'),
+      ),
+      (
+        title: 'In 31–90 Tagen fällig',
+        count: counts[DueStatus.medium],
+        subtitle: 'Nächster Planungszeitraum',
+        color: ViewerColors.medium,
+        action: () => controller.openFiltered(due: 'medium'),
+      ),
+      (
+        title: 'Ohne gültigen Termin',
+        count: counts[DueStatus.missing],
+        subtitle: 'In der Prüf-App prüfen',
+        color: ViewerColors.missing,
+        action: () => controller.openFiltered(due: 'missing'),
+      ),
+      (
+        title: 'Ergebniscode F',
+        count: counts.failed,
+        subtitle: 'Aktueller Geräteeintrag',
+        color: counts.failed > 0 ? ViewerColors.overdue : ViewerColors.brand,
+        action: () => controller.openFiltered(result: 'F'),
+      ),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -119,19 +106,12 @@ class DashboardView extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 formatCount(card.count),
-                                style: TextStyle(
-                                  fontSize: 34,
-                                  color: card.color,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: TextStyle(fontSize: 34, color: card.color, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 '${card.subtitle} ↗',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: ViewerColors.muted,
-                                ),
+                                style: const TextStyle(fontSize: 11, color: ViewerColors.muted),
                               ),
                             ],
                           ),
@@ -168,7 +148,7 @@ class DashboardView extends StatelessWidget {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 18),
           child: Text(
-            'Due dates come from “NextTest”. Missing dates are not estimated from the inspection interval. A future due date does not indicate operational safety.',
+            'Prüftermine stammen aus „NextTest“. Fehlende Termine werden nicht aus dem Prüfintervall geschätzt. Ein zukünftiger Termin sagt nichts über die Betriebssicherheit aus.',
             style: TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
         ),
@@ -178,53 +158,31 @@ class DashboardView extends StatelessWidget {
 
   Widget _duePanel(BuildContext context, DashboardCounts counts, bool manual) {
     final parts = <({String label, int value, Color color, String filter})>[
+      (label: 'Überfällig', value: counts[DueStatus.overdue], color: ViewerColors.overdue, filter: 'overdue'),
       (
-        label: 'Overdue',
-        value: counts[DueStatus.overdue],
-        color: ViewerColors.overdue,
-        filter: 'overdue',
-      ),
-      (
-        label: manual ? 'Reference date to 30 days' : 'Today to 30 days',
+        label: manual ? 'Stichtag bis 30 Tage' : 'Heute bis 30 Tage',
         value: counts.soon,
         color: ViewerColors.soon,
         filter: 'soon',
       ),
-      (
-        label: '31–90 days',
-        value: counts[DueStatus.medium],
-        color: ViewerColors.medium,
-        filter: 'medium',
-      ),
-      (
-        label: 'More than 90 days',
-        value: counts[DueStatus.later],
-        color: ViewerColors.later,
-        filter: 'later',
-      ),
-      (
-        label: 'No valid due date',
-        value: counts[DueStatus.missing],
-        color: ViewerColors.missing,
-        filter: 'missing',
-      ),
+      (label: '31–90 Tage', value: counts[DueStatus.medium], color: ViewerColors.medium, filter: 'medium'),
+      (label: 'Mehr als 90 Tage', value: counts[DueStatus.later], color: ViewerColors.later, filter: 'later'),
+      (label: 'Ohne gültigen Termin', value: counts[DueStatus.missing], color: ViewerColors.missing, filter: 'missing'),
     ];
-    final accessibleSummary = parts
-        .map((part) => '${part.label} ${part.value}')
-        .join(', ');
+    final accessibleSummary = parts.map((part) => '${part.label} ${part.value}').join(', ');
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionTitle(
-            label: 'Inspection dates',
-            title: 'Due dates',
-            subtitle: 'Distribution of upcoming inspections',
+            label: 'Prüftermine',
+            title: 'Fälligkeiten',
+            subtitle: 'Verteilung der nächsten Prüftermine',
           ),
           const SizedBox(height: 20),
           Center(
             child: Semantics(
-              label: 'Due dates: $accessibleSummary',
+              label: 'Fälligkeiten: $accessibleSummary',
               child: SizedBox(
                 width: 175,
                 height: 175,
@@ -244,18 +202,9 @@ class DashboardView extends StatelessWidget {
                       children: [
                         Text(
                           formatCount(counts.total),
-                          style: const TextStyle(
-                            fontSize: 29,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(fontSize: 29, fontWeight: FontWeight.w600),
                         ),
-                        const Text(
-                          'Total devices',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: ViewerColors.muted,
-                          ),
-                        ),
+                        const Text('Geräte insgesamt', style: TextStyle(fontSize: 11, color: ViewerColors.muted)),
                       ],
                     ),
                   ],
@@ -274,28 +223,13 @@ class DashboardView extends StatelessWidget {
                     Container(
                       width: 10,
                       height: 10,
-                      decoration: BoxDecoration(
-                        color: part.color,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: part.color, shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        part.label,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ),
-                    Text(
-                      formatCount(part.value),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
+                    Expanded(child: Text(part.label, style: const TextStyle(fontSize: 13))),
+                    Text(formatCount(part.value), style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(width: 8),
-                    const Icon(
-                      Icons.chevron_right,
-                      size: 16,
-                      color: ViewerColors.muted,
-                    ),
+                    const Icon(Icons.chevron_right, size: 16, color: ViewerColors.muted),
                   ],
                 ),
               ),
@@ -323,23 +257,19 @@ class DashboardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionTitle(
-            label: 'Priorities',
-            title: 'Overdue devices by location',
-            subtitle: 'Eight largest backlogs · tap to filter',
+            label: 'Prioritäten',
+            title: 'Überfällige Geräte nach Standort',
+            subtitle: 'Acht grösste Rückstände · antippen zum Filtern',
           ),
           const SizedBox(height: 20),
           if (top.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 55),
-              child: Text(
-                'No overdue devices in this scope.',
-                style: TextStyle(color: ViewerColors.muted),
-              ),
+              child: Text('Keine überfälligen Geräte in diesem Bereich.', style: TextStyle(color: ViewerColors.muted)),
             ),
           for (final entry in top)
             InkWell(
-              onTap: () =>
-                  controller.openFiltered(due: 'overdue', location: entry.key),
+              onTap: () => controller.openFiltered(due: 'overdue', location: entry.key),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
@@ -347,17 +277,9 @@ class DashboardView extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            locationLabel(entry.key),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
+                        Expanded(child: Text(locationLabel(entry.key), style: const TextStyle(fontSize: 13))),
                         const SizedBox(width: 12),
-                        Text(
-                          formatCount(entry.value),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
+                        Text(formatCount(entry.value), style: const TextStyle(fontWeight: FontWeight.w700)),
                       ],
                     ),
                     const SizedBox(height: 7),
@@ -380,18 +302,9 @@ class DashboardView extends StatelessWidget {
   }
 
   Widget _forecastPanel(BuildContext context, List<DeviceRecord> scope) {
-    final months = forecast(
-      scope,
-      controller.reference,
-      controller.filters.horizonMonths,
-    );
-    final maxCount = months.fold<int>(
-      1,
-      (current, month) => math.max(current, month.count),
-    );
-    final startLabel = controller.filters.manualDate == null
-        ? 'today'
-        : 'reference date ${controller.reference.display}';
+    final months = forecast(scope, controller.reference, controller.filters.horizonMonths);
+    final maxCount = months.fold<int>(1, (current, month) => math.max(current, month.count));
+    final startLabel = controller.filters.manualDate == null ? 'heute' : 'Stichtag ${controller.reference.display}';
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,11 +315,9 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SectionTitle(
-                label: 'Forecast',
-                title:
-                    'Due dates for the next ${controller.filters.horizonMonths} months',
-                subtitle:
-                    'Starting $startLabel; overdue devices are not counted again.',
+                label: 'Vorschau',
+                title: 'Prüftermine der nächsten ${controller.filters.horizonMonths} Monate',
+                subtitle: 'Ab $startLabel; überfällige Geräte werden nicht erneut gezählt.',
               ),
               SizedBox(
                 width: 155,
@@ -414,14 +325,8 @@ class DashboardView extends StatelessWidget {
                   key: ValueKey(controller.filters.horizonMonths),
                   isExpanded: true,
                   initialValue: controller.filters.horizonMonths,
-                  decoration: const InputDecoration(labelText: 'Period'),
-                  items: [
-                    for (final value in horizons)
-                      DropdownMenuItem(
-                        value: value,
-                        child: Text('$value months'),
-                      ),
-                  ],
+                  decoration: const InputDecoration(labelText: 'Zeitraum'),
+                  items: [for (final value in horizons) DropdownMenuItem(value: value, child: Text('$value Monate'))],
                   onChanged: (value) {
                     if (value != null) {
                       controller.filters.horizonMonths = value;
@@ -439,20 +344,15 @@ class DashboardView extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Tap a month to view devices · swipe horizontally if needed',
+            'Monat antippen, um Geräte anzuzeigen · bei Bedarf horizontal wischen',
             style: TextStyle(fontSize: 11, color: ViewerColors.muted),
           ),
           const SizedBox(height: 14),
           LayoutBuilder(
             builder: (context, constraints) {
-              final barWidth = math.max(
-                46.0,
-                constraints.maxWidth / months.length,
-              );
+              final barWidth = math.max(46.0, constraints.maxWidth / months.length);
               return SingleChildScrollView(
-                key: ValueKey(
-                  'forecast-${controller.filters.horizonMonths}-${controller.reference.iso}',
-                ),
+                key: ValueKey('forecast-${controller.filters.horizonMonths}-${controller.reference.iso}'),
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -460,31 +360,20 @@ class DashboardView extends StatelessWidget {
                     for (final month in months)
                       Semantics(
                         button: true,
-                        label:
-                            '${monthLabel(month.start)}: ${month.count} devices',
+                        label: '${monthLabel(month.start)}: ${month.count} Geräte',
                         child: InkWell(
-                          onTap: () => controller.openFiltered(
-                            month: month.start.monthKey,
-                          ),
+                          onTap: () => controller.openFiltered(month: month.start.monthKey),
                           borderRadius: BorderRadius.circular(8),
                           child: SizedBox(
                             width: barWidth,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 6,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    month.count == 0
-                                        ? '–'
-                                        : formatCount(month.count),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    month.count == 0 ? '–' : formatCount(month.count),
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 7),
                                   SizedBox(
@@ -492,15 +381,10 @@ class DashboardView extends StatelessWidget {
                                     child: Align(
                                       alignment: Alignment.bottomCenter,
                                       child: Container(
-                                        height: math.max(
-                                          2.0,
-                                          month.count / maxCount * 140.0,
-                                        ),
+                                        height: math.max(2.0, month.count / maxCount * 140.0),
                                         decoration: BoxDecoration(
                                           color: ViewerColors.brand,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
+                                          borderRadius: BorderRadius.circular(4),
                                         ),
                                       ),
                                     ),
@@ -509,10 +393,7 @@ class DashboardView extends StatelessWidget {
                                   Text(
                                     '${monthNames[month.start.month - 1]}\n${month.start.year}',
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      color: ViewerColors.muted,
-                                    ),
+                                    style: const TextStyle(fontSize: 10, color: ViewerColors.muted),
                                   ),
                                 ],
                               ),

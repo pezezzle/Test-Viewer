@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../domain/calendar_day.dart';
 import '../domain/device.dart';
 import '../state/viewer_controller.dart';
@@ -11,11 +13,7 @@ import 'theme.dart';
 class HomeScreen extends StatefulWidget {
   final ViewerController controller;
   final VoidCallback onToggleDemo;
-  const HomeScreen({
-    super.key,
-    required this.controller,
-    required this.onToggleDemo,
-  });
+  const HomeScreen({super.key, required this.controller, required this.onToggleDemo});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -46,12 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final target = tableStart.currentContext;
       if (mounted && target != null)
-        unawaited(
-          Scrollable.ensureVisible(
-            target,
-            duration: const Duration(milliseconds: 180),
-          ),
-        );
+        unawaited(Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 180)));
     });
   }
 
@@ -79,18 +72,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _header(context),
-                    if (controller.busy)
-                      const LinearProgressIndicator(minHeight: 3),
+                    if (controller.busy) const LinearProgressIndicator(minHeight: 3),
                     Align(
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1500),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: MediaQuery.sizeOf(context).width < 600
-                                ? 16
-                                : 30,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width < 600 ? 16 : 30),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -98,90 +86,55 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 14),
                                   child: _notice(
-                                    'DEMO MODE · synthetic data only',
+                                    'DEMOMODUS · ausschliesslich fiktive Daten',
                                     ViewerColors.medium,
                                     action: TextButton(
                                       onPressed: widget.onToggleDemo,
-                                      child: const Text('Exit demo'),
+                                      child: const Text('Demo beenden'),
                                     ),
                                   ),
                                 ),
                               Row(
                                 children: [
-                                  Expanded(
-                                    child: _tab(
-                                      'Dashboard',
-                                      0,
-                                      Icons.space_dashboard_outlined,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: _tab(
-                                      'Devices',
-                                      1,
-                                      Icons.list_alt_outlined,
-                                    ),
-                                  ),
+                                  Expanded(child: _tab('Übersicht', 0, Icons.space_dashboard_outlined)),
+                                  Expanded(child: _tab('Geräte', 1, Icons.list_alt_outlined)),
                                 ],
                               ),
-                              const Divider(
-                                height: 1,
-                                color: ViewerColors.border,
-                              ),
+                              const Divider(height: 1, color: ViewerColors.border),
                               const SizedBox(height: 20),
-                              if (controller.snapshot != null)
-                                _filterBar(context),
+                              if (controller.snapshot != null) _filterBar(context),
                               if (controller.error != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 18),
                                   child: _notice(
-                                    '${controller.error}${controller.stale ? '\nThe visible devices are from the last successful read.' : ''}',
+                                    '${controller.error}${controller.stale ? '\nDie sichtbaren Geräte stammen vom letzten erfolgreichen Einlesen.' : ''}',
                                     ViewerColors.overdue,
                                   ),
                                 ),
                               if (controller.persistenceWarning != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 18),
-                                  child: _notice(
-                                    controller.persistenceWarning!,
-                                    ViewerColors.soon,
-                                  ),
+                                  child: _notice(controller.persistenceWarning!, ViewerColors.soon),
                                 ),
-                              if (controller.snapshot?.warnings.isNotEmpty ??
-                                  false)
+                              if (controller.snapshot?.warnings.isNotEmpty ?? false)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 18),
-                                  child: _notice(
-                                    controller.snapshot!.warnings.join('\n'),
-                                    ViewerColors.soon,
-                                  ),
+                                  child: _notice(controller.snapshot!.warnings.join('\n'), ViewerColors.soon),
                                 ),
                               if (!controller.initialized)
                                 const Padding(
                                   padding: EdgeInsets.all(50),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
+                                  child: Center(child: CircularProgressIndicator()),
                                 ),
-                              if (controller.initialized &&
-                                  controller.snapshot == null)
-                                _welcome(context),
-                              if (controller.snapshot != null &&
-                                  controller.tab == 0)
+                              if (controller.initialized && controller.snapshot == null) _welcome(context),
+                              if (controller.snapshot != null && controller.tab == 0)
                                 DashboardView(controller: controller),
-                              if (controller.snapshot != null &&
-                                  controller.tab == 1)
+                              if (controller.snapshot != null && controller.tab == 1)
                                 Container(
                                   key: tableStart,
-                                  child: DevicesView(
-                                    controller: controller,
-                                    onPageChanged: jumpToDevices,
-                                  ),
+                                  child: DevicesView(controller: controller, onPageChanged: jumpToDevices),
                                 ),
-                              const Divider(
-                                height: 1,
-                                color: ViewerColors.border,
-                              ),
+                              const Divider(height: 1, color: ViewerColors.border),
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 18),
                                 child: Wrap(
@@ -190,18 +143,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   alignment: WrapAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Test Viewer · 2.0.0',
-                                      style: TextStyle(
-                                        color: ViewerColors.muted,
-                                        fontSize: 11,
-                                      ),
+                                      'Test Viewer · 2.0.1',
+                                      style: TextStyle(color: ViewerColors.muted, fontSize: 11),
                                     ),
                                     Text(
-                                      'Test-Master companion · Offline · Read only',
-                                      style: TextStyle(
-                                        color: ViewerColors.muted,
-                                        fontSize: 11,
-                                      ),
+                                      'Ergänzung zu Test-Master · Offline · Nur Lesen',
+                                      style: TextStyle(color: ViewerColors.muted, fontSize: 11),
                                     ),
                                   ],
                                 ),
@@ -232,8 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(message, style: TextStyle(fontSize: 13, color: color)),
-        if (action != null)
-          Align(alignment: Alignment.centerRight, child: action),
+        if (action != null) Align(alignment: Alignment.centerRight, child: action),
       ],
     ),
   );
@@ -273,12 +219,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   Text(
                     controller.customerHeading == 'Test Viewer'
-                        ? 'Test-Master companion'
-                        : 'Test Viewer · Test-Master companion',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: ViewerColors.muted,
-                    ),
+                        ? 'Ergänzung zu Test-Master'
+                        : 'Test Viewer · Ergänzung zu Test-Master',
+                    style: const TextStyle(fontSize: 12, color: ViewerColors.muted),
                   ),
                 ],
               ),
@@ -287,21 +230,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         const SizedBox(height: 8),
         Text(
-          data?.sourceLabel ?? 'Connect the database from your inspection app.',
-          style: TextStyle(
-            fontSize: 12,
-            color: controller.stale ? ViewerColors.overdue : ViewerColors.muted,
-          ),
+          data?.sourceLabel ?? 'Verbinde die Datenbank deiner Prüf-App.',
+          style: TextStyle(fontSize: 12, color: controller.stale ? ViewerColors.overdue : ViewerColors.muted),
         ),
         if (data != null)
           Text(
-            '${controller.stale ? 'STALE SNAPSHOT · ' : ''}Last read: ${_readLabel(data.readAt)}',
-            style: TextStyle(
-              fontSize: 12,
-              color: controller.stale
-                  ? ViewerColors.overdue
-                  : ViewerColors.muted,
-            ),
+            '${controller.stale ? 'ALTER DATENSTAND · ' : ''}Zuletzt eingelesen: ${_readLabel(data.readAt)}',
+            style: TextStyle(fontSize: 12, color: controller.stale ? ViewerColors.overdue : ViewerColors.muted),
           ),
       ],
     );
@@ -320,14 +255,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  controller.filters.manualDate == null
-                      ? 'REFERENCE DATE · AUTO'
-                      : 'REFERENCE DATE · MANUAL',
-                  style: const TextStyle(
-                    fontSize: 9,
-                    letterSpacing: 0.6,
-                    color: ViewerColors.muted,
-                  ),
+                  controller.filters.manualDate == null ? 'STICHTAG · AUTO' : 'STICHTAG · MANUELL',
+                  style: const TextStyle(fontSize: 9, letterSpacing: 0.6, color: ViewerColors.muted),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -335,17 +264,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: [
                     Text(
                       controller.reference.display,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 5),
-                    const Icon(
-                      Icons.edit_calendar_outlined,
-                      size: 16,
-                      color: ViewerColors.brand,
-                    ),
+                    const Icon(Icons.edit_calendar_outlined, size: 16, color: ViewerColors.brand),
                   ],
                 ),
               ],
@@ -354,13 +276,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         OutlinedButton(
           onPressed: controller.demo || controller.busy ? null : settings,
-          style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 15),
-          ),
-          child: Text(
-            'Database',
-            style: TextStyle(fontSize: compact ? 12 : 13),
-          ),
+          style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 15)),
+          child: Text('Datenbank', style: TextStyle(fontSize: compact ? 12 : 13)),
         ),
         FilledButton(
           onPressed: controller.busy
@@ -372,15 +289,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     unawaited(settings());
                   }
                 },
-          style: FilledButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 15),
-          ),
+          style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 15)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.refresh, size: 17),
               const SizedBox(width: 5),
-              Text('Refresh', style: TextStyle(fontSize: compact ? 12 : 13)),
+              Text('Aktualisieren', style: TextStyle(fontSize: compact ? 12 : 13)),
             ],
           ),
         ),
@@ -391,10 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         color: Colors.white,
         border: Border(bottom: BorderSide(color: ViewerColors.border)),
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 16 : 30,
-        vertical: 18,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 30, vertical: 18),
       child: LayoutBuilder(
         builder: (context, constraints) => constraints.maxWidth < 900
             ? Column(
@@ -424,24 +336,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 6),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            width: 3,
-            color: controller.tab == value
-                ? ViewerColors.brand
-                : Colors.transparent,
-          ),
+          bottom: BorderSide(width: 3, color: controller.tab == value ? ViewerColors.brand : Colors.transparent),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: controller.tab == value
-                ? ViewerColors.brand
-                : ViewerColors.muted,
-          ),
+          Icon(icon, size: 18, color: controller.tab == value ? ViewerColors.brand : ViewerColors.muted),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
@@ -450,18 +351,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               maxLines: 1,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: controller.tab == value
-                    ? ViewerColors.brand
-                    : ViewerColors.muted,
+                color: controller.tab == value ? ViewerColors.brand : ViewerColors.muted,
               ),
             ),
           ),
           if (value == 1 && controller.snapshot != null) ...[
             const SizedBox(width: 8),
-            Text(
-              formatCount(controller.scope.length),
-              style: const TextStyle(fontSize: 11, color: ViewerColors.muted),
-            ),
+            Text(formatCount(controller.scope.length), style: const TextStyle(fontSize: 11, color: ViewerColors.muted)),
           ],
         ],
       ),
@@ -471,10 +367,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _filterBar(BuildContext context) {
     final selected = controller.filters.locations;
     final title = selected.isEmpty
-        ? 'All locations'
+        ? 'Alle Standorte'
         : selected.length == 1
         ? locationLabel(selected.first)
-        : '${selected.length} locations selected';
+        : '${selected.length} Standorte ausgewählt';
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Wrap(
@@ -484,9 +380,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         children: [
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width < 600
-                  ? MediaQuery.sizeOf(context).width - 32
-                  : 380,
+              maxWidth: MediaQuery.sizeOf(context).width < 600 ? MediaQuery.sizeOf(context).width - 32 : 380,
             ),
             child: OutlinedButton(
               onPressed: () => showLocations(context, controller),
@@ -503,12 +397,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
           Text(
-            '${formatCount(controller.scope.length)} devices in the selected scope',
+            '${formatCount(controller.scope.length)} Geräte im ausgewählten Bereich',
             style: const TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
           TextButton(
             onPressed: controller.resetFilters,
-            child: const Text('Reset filters', style: TextStyle(fontSize: 12)),
+            child: const Text('Filter zurücksetzen', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -521,20 +415,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: Column(
         children: [
           const SizedBox(height: 22),
-          const Icon(
-            Icons.dashboard_customize_outlined,
-            size: 48,
-            color: ViewerColors.brand,
-          ),
+          const Icon(Icons.dashboard_customize_outlined, size: 48, color: ViewerColors.brand),
           const SizedBox(height: 18),
           Text(
-            'Your devices. Your overview.',
+            'Deine Geräte. Dein Überblick.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 14),
           const Text(
-            'Choose the folder containing pcdrdata.sqlite3. The source is read again whenever the app opens.',
+            'Wähle den Ordner mit pcdrdata.sqlite3. Die Quelle wird bei jedem Start der App neu eingelesen.',
             textAlign: TextAlign.center,
             style: TextStyle(color: ViewerColors.muted),
           ),
@@ -542,19 +432,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           FilledButton.icon(
             onPressed: controller.busy ? null : settings,
             icon: const Icon(Icons.folder_open),
-            label: const Text('Connect database'),
+            label: const Text('Datenbank verbinden'),
           ),
           const SizedBox(height: 8),
           if (!controller.demo)
-            TextButton(
-              onPressed: widget.onToggleDemo,
-              child: const Text('Try with sample data'),
-            ),
+            TextButton(onPressed: widget.onToggleDemo, child: const Text('Mit fiktiven Daten ausprobieren')),
           const SizedBox(height: 14),
-          const Text(
-            'Local · Offline · Read only',
-            style: TextStyle(fontSize: 12, color: ViewerColors.muted),
-          ),
+          const Text('Lokal · Offline · Nur Lesen', style: TextStyle(fontSize: 12, color: ViewerColors.muted)),
           const SizedBox(height: 16),
         ],
       ),

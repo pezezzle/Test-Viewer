@@ -1,8 +1,8 @@
 # Synthetic sample data
 
-The welcome screen provides **Try with sample data**. Demo mode is clearly marked and never mixes its data with a selected database.
+The welcome screen provides **Mit fiktiven Daten ausprobieren**. Demo mode is clearly marked and never mixes its data with a selected database.
 
-To test Android or iOS folder selection, create an additional SQLite file containing only synthetic data:
+To test Android folder selection, create an additional SQLite file containing only synthetic data:
 
 ```sh
 python tool/create_demo_database.py example/demo.sqlite3

@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.9'
+          flutter-version: '3.47.2'
           channel: stable
           cache: true
       - run: flutter pub get
@@ -34,7 +34,7 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.9'
+          flutter-version: '3.47.2'
           channel: stable
           cache: true
       - run: flutter pub get
@@ -43,24 +43,5 @@ jobs:
         with:
           name: testmaster-viewer-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-  ios:
-    needs: flutter-tests
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.9'
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - run: flutter build ios --simulator --debug --no-codesign
-      - run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphonesimulator/Runner.app TestMaster-Viewer-Simulator.zip
-      - uses: actions/upload-artifact@v4
-        with:
-          name: testmaster-viewer-ios-simulator
-          path: TestMaster-Viewer-Simulator.zip
           if-no-files-found: error
           retention-days: 14
