@@ -1,8 +1,8 @@
 # Test Viewer · Flutter
 
-Offline companion app for Test-Master inspection data on Android and iOS. Version **2.0.0+6**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**.
+Offline companion app for Test-Master inspection data on Android and iOS. Version **2.0.0+6**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**. The current user interface and bundled documentation are English-only.
 
-**Project status:** Flutter analysis, all logic/widget tests, and signed Android debug/release APK builds have completed successfully. The iOS build still requires macOS with Xcode. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
+**Project status:** Flutter analysis and all 51 logic/widget tests pass. The Android debug APK and the production-signed Android release APK have been built locally; the release signature and certificate fingerprint were independently verified. The production-signed Android App Bundle and the iOS app build have not yet been fully verified. Building iOS requires macOS with Xcode. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
 
 ## Getting started
 
@@ -21,7 +21,13 @@ Select **Try with sample data** on the welcome screen to explore the app without
 flutter run --dart-define=DEMO_MODE=true
 ```
 
-The app targets Android 8.0+ and iOS 15+. Builds for physical devices and app stores must be signed with your own Android key or Apple team.
+The app targets Android 8.0+ and iOS 15+. Android debug builds use standard debug signing. Android release/store builds require the publisher's private signing key, while physical-device and App Store builds for iOS require the publisher's Apple Developer team.
+
+## Download
+
+[Download the latest signed Android APK](https://github.com/pezezzle/Test-Viewer/releases/latest/download/Test-Viewer-2.0.0+6.apk)
+
+Release files are published as GitHub Release assets and are not committed to the source repository. Verify the SHA-256 checksum listed in the corresponding release notes before installation.
 
 ### Windows: use one package cache for the IDE and build tools
 
@@ -32,6 +38,8 @@ Set `PUB_CACHE` for all tools to the same directory **outside AppData**, for exa
 ## VS Code release task
 
 Press `Ctrl+Shift+B` in VS Code to run the default task **Test Viewer: build signed release APK**. It restores packages, runs analysis and all tests, and creates the signed APK at `build/app/outputs/flutter-apk/app-release.apk`.
+
+The task runs entirely on the local computer. It does not invoke Git, contact GitHub, upload artifacts, or publish a release.
 
 ## Included views
 
@@ -76,9 +84,11 @@ The scripts run `flutter analyze` and `flutter test` before building and stop on
 
 ## GitHub repository
 
-The source is stored in the private repository `pezezzle/Test-Viewer`. `Publish-ToGitHub.ps1` is intended only for creating a new private repository from a fresh source folder; it refuses existing Git history and never force-pushes.
+The source is stored in the public repository `pezezzle/Test-Viewer`. Local changes must be reviewed and explicitly approved before they are committed, pushed, or published. Build artifacts are not added to the Git repository.
 
 GitHub Actions includes validation, an Android debug build, an iOS simulator build, and a manually triggered signed Android build. Simulator and debug artifacts are not store releases. Release secrets must only be configured through protected GitHub environment secrets.
+
+Approved production APKs are attached to GitHub Releases as public download assets.
 
 ## Further documentation
 
