@@ -1,5 +1,12 @@
 # Test Viewer · Flutter
 
+[![Latest release](https://img.shields.io/github/v/release/pezezzle/Test-Viewer?display_name=tag&sort=semver)](https://github.com/pezezzle/Test-Viewer/releases/latest)
+[![Release downloads](https://img.shields.io/github/downloads/pezezzle/Test-Viewer/total?label=downloads)](https://github.com/pezezzle/Test-Viewer/releases)
+[![Validate and build](https://github.com/pezezzle/Test-Viewer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pezezzle/Test-Viewer/actions/workflows/ci.yml)
+[![Last commit](https://img.shields.io/github/last-commit/pezezzle/Test-Viewer/main)](https://github.com/pezezzle/Test-Viewer/commits/main)
+[![Flutter 3.44.9](https://img.shields.io/badge/Flutter-3.44.9-02569B?logo=flutter&logoColor=white)](https://docs.flutter.dev/)
+[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/pezezzle/Test-Viewer/releases/latest)
+
 Offline companion app for Test-Master inspection data on Android and iOS. Version **2.0.0+6**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**. The current user interface and bundled documentation are English-only.
 
 **Project status:** Flutter analysis and all 51 logic/widget tests pass. The Android debug APK and the production-signed Android release APK have been built locally; the release signature and certificate fingerprint were independently verified. The production-signed Android App Bundle and the iOS app build have not yet been fully verified. Building iOS requires macOS with Xcode. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
@@ -29,7 +36,15 @@ The app targets Android 8.0+ and iOS 15+. Android debug builds use standard debu
 
 Release files are published as GitHub Release assets and are not committed to the source repository. Verify the SHA-256 checksum listed in the corresponding release notes before installation.
 
-### Windows: use one package cache for the IDE and build tools
+### Release history
+
+| Version | Published | Android download | Changes |
+|---|---:|---|---|
+| [2.0.0+6](https://github.com/pezezzle/Test-Viewer/releases/tag/v2.0.0%2B6) | 2026-09-05 | [Signed APK](https://github.com/pezezzle/Test-Viewer/releases/download/v2.0.0%2B6/Test-Viewer-2.0.0+6.apk) | [Changelog](CHANGELOG.md) |
+
+## Windows troubleshooting
+
+### Use one package cache for the IDE and build tools
 
 Packaged Windows apps can redirect `AppData` into an app-specific data area. In that situation, `.dart_tool/package_config.json` can reference packages that are available to the process that created it but unavailable to VS Code. An Android build may still succeed while F5 exits with `Exited (1)` and the app remains paused at startup.
 
