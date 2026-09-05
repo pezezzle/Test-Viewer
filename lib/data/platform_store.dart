@@ -40,9 +40,7 @@ class PlatformViewerStore implements ViewerStore {
     if (result is String)
       return Map<String, Object?>.from(jsonDecode(result) as Map);
     if (result is Map) return Map<String, Object?>.from(result);
-    throw const FormatException(
-      'Die Plattform hat keine gültige Antwort geliefert.',
-    );
+    throw const FormatException('The platform returned an invalid response.');
   }
 
   @override

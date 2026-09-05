@@ -98,11 +98,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 14),
                                   child: _notice(
-                                    'DEMOMODUS · ausschliesslich fiktive Daten',
+                                    'DEMO MODE · synthetic data only',
                                     ViewerColors.medium,
                                     action: TextButton(
                                       onPressed: widget.onToggleDemo,
-                                      child: const Text('Demo beenden'),
+                                      child: const Text('Exit demo'),
                                     ),
                                   ),
                                 ),
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   ),
                                   Expanded(
                                     child: _tab(
-                                      'Geräte',
+                                      'Devices',
                                       1,
                                       Icons.list_alt_outlined,
                                     ),
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 18),
                                   child: _notice(
-                                    '${controller.error}${controller.stale ? '\nDie sichtbaren Geräte stammen vom letzten erfolgreichen Einlesen.' : ''}',
+                                    '${controller.error}${controller.stale ? '\nThe visible devices are from the last successful read.' : ''}',
                                     ViewerColors.overdue,
                                   ),
                                 ),
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       ),
                                     ),
                                     Text(
-                                      'Ergänzung zu Test-Master · Offline · Nur Lesen',
+                                      'Test-Master companion · Offline · Read only',
                                       style: TextStyle(
                                         color: ViewerColors.muted,
                                         fontSize: 11,
@@ -273,8 +273,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   Text(
                     controller.customerHeading == 'Test Viewer'
-                        ? 'Ergänzung zu Test-Master'
-                        : 'Test Viewer · Ergänzung zu Test-Master',
+                        ? 'Test-Master companion'
+                        : 'Test Viewer · Test-Master companion',
                     style: const TextStyle(
                       fontSize: 12,
                       color: ViewerColors.muted,
@@ -287,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         const SizedBox(height: 8),
         Text(
-          data?.sourceLabel ?? 'Verbinde die Datenbank deiner Prüf-App.',
+          data?.sourceLabel ?? 'Connect the database from your inspection app.',
           style: TextStyle(
             fontSize: 12,
             color: controller.stale ? ViewerColors.overdue : ViewerColors.muted,
@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         if (data != null)
           Text(
-            '${controller.stale ? 'ALTER DATENSTAND · ' : ''}Zuletzt eingelesen: ${_readLabel(data.readAt)}',
+            '${controller.stale ? 'STALE SNAPSHOT · ' : ''}Last read: ${_readLabel(data.readAt)}',
             style: TextStyle(
               fontSize: 12,
               color: controller.stale
@@ -321,8 +321,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 Text(
                   controller.filters.manualDate == null
-                      ? 'STICHTAG · AUTO'
-                      : 'STICHTAG · MANUELL',
+                      ? 'REFERENCE DATE · AUTO'
+                      : 'REFERENCE DATE · MANUAL',
                   style: const TextStyle(
                     fontSize: 9,
                     letterSpacing: 0.6,
@@ -358,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 15),
           ),
           child: Text(
-            'Datenbank',
+            'Database',
             style: TextStyle(fontSize: compact ? 12 : 13),
           ),
         ),
@@ -380,10 +380,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               const Icon(Icons.refresh, size: 17),
               const SizedBox(width: 5),
-              Text(
-                'Aktualisieren',
-                style: TextStyle(fontSize: compact ? 12 : 13),
-              ),
+              Text('Refresh', style: TextStyle(fontSize: compact ? 12 : 13)),
             ],
           ),
         ),
@@ -474,10 +471,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _filterBar(BuildContext context) {
     final selected = controller.filters.locations;
     final title = selected.isEmpty
-        ? 'Alle Standorte'
+        ? 'All locations'
         : selected.length == 1
         ? locationLabel(selected.first)
-        : '${selected.length} Standorte ausgewählt';
+        : '${selected.length} locations selected';
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Wrap(
@@ -506,15 +503,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
           Text(
-            '${formatCount(controller.scope.length)} Geräte im ausgewählten Bereich',
+            '${formatCount(controller.scope.length)} devices in the selected scope',
             style: const TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
           TextButton(
             onPressed: controller.resetFilters,
-            child: const Text(
-              'Filter zurücksetzen',
-              style: TextStyle(fontSize: 12),
-            ),
+            child: const Text('Reset filters', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -534,13 +528,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
           const SizedBox(height: 18),
           Text(
-            'Deine Geräte. Dein Überblick.',
+            'Your devices. Your overview.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 14),
           const Text(
-            'Wähle den Ordner mit pcdrdata.sqlite3 aus. Die Daten werden beim erneuten Öffnen frisch eingelesen.',
+            'Choose the folder containing pcdrdata.sqlite3. The source is read again whenever the app opens.',
             textAlign: TextAlign.center,
             style: TextStyle(color: ViewerColors.muted),
           ),
@@ -548,17 +542,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           FilledButton.icon(
             onPressed: controller.busy ? null : settings,
             icon: const Icon(Icons.folder_open),
-            label: const Text('Datenbank verbinden'),
+            label: const Text('Connect database'),
           ),
           const SizedBox(height: 8),
           if (!controller.demo)
             TextButton(
               onPressed: widget.onToggleDemo,
-              child: const Text('Mit fiktiven Daten ausprobieren'),
+              child: const Text('Try with sample data'),
             ),
           const SizedBox(height: 14),
           const Text(
-            'Lokal · Offline · Nur Lesen',
+            'Local · Offline · Read only',
             style: TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
           const SizedBox(height: 16),

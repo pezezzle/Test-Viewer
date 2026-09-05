@@ -1,53 +1,53 @@
-# Architektur
+# Architecture
 
-## Gemeinsamer Flutter-Teil
+## Shared Flutter layer
 
-`lib/domain` enthält Datumsberechnung, Geräte-Datenmodell, Suche, natürliche Sortierung, Filter und Monatsaggregation. `CalendarDay` berechnet Tagesabstände über UTC-Mitternacht, liest den automatischen Stichtag aber aus dem lokalen Kalenderdatum. Dadurch verschieben Sommerzeitwechsel die Tagesabstände nicht.
+`lib/domain` contains calendar calculations, the device data model, search, natural sorting, filters, and monthly aggregation. `CalendarDay` calculates day differences across UTC midnight while obtaining the automatic reference date from the local calendar. Daylight-saving transitions therefore do not shift day counts.
 
-`lib/state/viewer_controller.dart` verwaltet Quelle, Datenstand, Stichtag, Standortauswahl, Pagination und gespeicherte Einstellungen. Ein Fehler beim erneuten Einlesen lässt den alten Datenstand sichtbar, kennzeichnet ihn aber als veraltet. Beim Wechsel der Datenquelle werden alte Gerätedaten und Quellfilter verworfen. Ein manuelles Datum bleibt erhalten.
+`lib/state/viewer_controller.dart` manages the source, loaded snapshot, reference date, location selection, pagination, and persisted settings. If a refresh fails, the previous snapshot remains visible but is marked as stale. Changing the source discards old device data and source-specific filters. A manual reference date persists.
 
-`lib/ui` enthält ausschliesslich Flutter-Widgets und einen `CustomPainter` für das Ringdiagramm. `lib/data/platform_store.dart` bildet die Grenze zur nativen Datei- und Datenbankanbindung. `DemoViewerStore` ist ein expliziter, rein fiktiver Ersatz für diese Schnittstelle.
+`lib/ui` contains Flutter widgets and a `CustomPainter` for the ring chart. `lib/data/platform_store.dart` is the boundary to native file and database access. `DemoViewerStore` is an explicit, entirely synthetic implementation of the same interface.
 
-## Native Anbindung
+## Native integration
 
-MethodChannel: `com.pezezzle.testmasterviewer/data`.
+Method channel: `com.pezezzle.testmasterviewer/data`.
 
-| Aufruf | Antwort |
+| Call | Response |
 |---|---|
-| `configuration` | JSON mit Ordner, Quellkennung, relativem Pfad und Konfigurationsstatus |
-| `chooseFolder` | Gespeicherte Ordnerfreigabe als JSON; bei Abbruch `null` |
-| `savePath` | Validierter relativer Pfad und aktuelle Konfiguration |
-| `readSnapshot` | JSON mit `devices`, `customers`, Quelle und erfolgreichem Lesezeitpunkt |
-| `loadSettings` / `saveSettings` | Gemeinsamer JSON-Einstellungsstand |
+| `configuration` | JSON containing folder, source identifier, relative path, and configuration state |
+| `chooseFolder` | Persisted folder grant as JSON; `null` when cancelled |
+| `savePath` | Validated relative path and current configuration |
+| `readSnapshot` | JSON containing `devices`, `customers`, source metadata, and the successful read time |
+| `loadSettings` / `saveSettings` | Shared JSON settings state |
 
-Android: Java, `FlutterActivity`, Storage Access Framework, SharedPreferences und Android-SQLite. Das Lesen läuft auf einem seriellen Worker; Antworten werden auf den UI-Thread zurückgegeben.
+Android uses Java, `FlutterActivity`, the Storage Access Framework, SharedPreferences, and Android SQLite. Reads run on a serial worker and return results on the UI thread.
 
-iOS: Swift, `FlutterAppDelegate`/`FlutterSceneDelegate`, `UIDocumentPickerViewController`, Bookmark und Security-Scoped Resource, UserDefaults sowie SQLite3. Datei-Lesezugriffe werden mit `NSFileCoordinator` koordiniert und laufen auf einer seriellen Queue.
+iOS uses Swift, `FlutterAppDelegate`/`FlutterSceneDelegate`, `UIDocumentPickerViewController`, a security-scoped bookmark, UserDefaults, and SQLite3. `NSFileCoordinator` coordinates file reads on a serial queue.
 
-## Datenmodell
+## Data model
 
-Erforderlich ist `tblIDNumbers` mit `CustomerNumber`, `IDNumber`, `Location`, `DeviceDescription` und `NextTest`. Weitere bekannte Spalten werden übernommen; fehlende optionale Spalten erscheinen als leer. Die Kunden werden aus `tblCustomer` gelesen, soweit vorhanden. Ohne Kundennamen wird die Kundennummer angezeigt.
+The required table is `tblIDNumbers` with `CustomerNumber`, `IDNumber`, `Location`, `DeviceDescription`, and `NextTest`. Additional known columns are included when present; missing optional columns remain empty. Customers are read from `tblCustomer` when available. If a customer name is missing, the customer number is displayed.
 
-Geräte werden über **Kundennummer + Geräte-ID** unterschieden. IDs bleiben Strings, damit führende Nullen erhalten bleiben. Geräte mit gleichen IDs bei verschiedenen Kunden werden nicht zusammengeführt. Leere Standorte sind als „Ohne Standort“ auswählbar. Mehrfachauswahl verknüpft Standorte mit ODER; verschiedene Filter und Suchwörter werden mit UND verknüpft.
+Devices are identified by **customer number + device ID**. IDs remain strings to preserve leading zeroes. Identical device IDs owned by different customers are never merged. Empty locations appear as **No location**. Multiple selected locations use OR; different filters and search terms use AND.
 
-Ausgewertet wird `NextTest` im Gerätestamm. Es werden keine Termine aus Prüfintervallen hochgerechnet und keine Prüfergebnisse aus anderen Tabellen rekonstruiert. `LastTest` und Ergebniscode stammen ebenfalls aus dem Gerätestamm. Eine neue Auswertung der Prüfhistorie ist nicht Teil der zwei gewünschten Ansichten.
+Due-date reporting uses `NextTest` from the device master record. Dates are not projected from inspection intervals, and results are not reconstructed from other tables. `LastTest` and the result code also come from the device master record. Reinterpreting inspection history is outside the scope of the two views.
 
-Die Kategorien sind: vor Stichtag, am Stichtag, 1–30, 31–90, mehr als 90 Tage sowie kein gültiger Termin. Der Dashboard-Filter „bis 30 Tage“ umfasst den Stichtag. Ein guter Terminstatus ist keine Aussage über die technische Sicherheit. Ergebniscode `F` bleibt eine separate Auffälligkeit.
+The due categories are: before the reference date, on the reference date, 1–30 days, 31–90 days, more than 90 days, and no valid date. The dashboard's 30-day filter includes the reference date. A future due date does not indicate technical safety. Result code `F` remains a separate warning.
 
-## Snapshot-Schutz
+## Snapshot protection
 
-1. Nur Dateien innerhalb des vom Nutzer freigegebenen Ordners zulassen.
-2. Aktive SQLite-Begleitdateien ablehnen.
-3. Quelle in privaten temporären Speicher kopieren und SHA-256 bilden.
-4. Quelle erneut vollständig hashen; Begleitdateien davor und danach prüfen.
-5. Nur bei identischen Hashes und gültigem SQLite-Header die Kopie öffnen.
-6. `PRAGMA quick_check(1)` ausführen, Schema prüfen, begrenzte Datensätze lesen.
-7. Temporäre Kopie und nur deren Begleitdateien entfernen.
+1. Accept only files inside the folder granted by the user.
+2. Reject active SQLite companion files.
+3. Copy the source into private temporary storage and calculate SHA-256.
+4. Hash the full source again and inspect companion files before and after the copy.
+5. Open the copy only when both hashes match and the SQLite header is valid.
+6. Run `PRAGMA quick_check(1)`, validate the schema, and read a bounded number of records.
+7. Delete the temporary copy and only its companion files.
 
-Grenzen: 512 MB Quelldatei, 200’000 Datensätze im mobilen Reader, 500 Zeichen im relativen Pfad. Diese Schutzmassnahmen ersetzen keinen Test des konkreten Dateiproviders. Eine laufende Prüf-App mit aktivem WAL muss ihre Änderungen erst sicher in die Hauptdatei übernehmen; die Übersicht erzwingt keinen Checkpoint in einer fremden Datenbank.
+Limits: 512 MB source file, 200,000 records in the mobile reader, and 500 characters in the relative path. These safeguards do not replace testing with the actual file provider. An inspection app with an active WAL must safely commit its changes to the main file first; the viewer never forces a checkpoint in another app's database.
 
-## Datenhaltung und Datenschutz
+## Storage and privacy
 
-Keine eigene Serververbindung, keine Telemetrie, kein Konto, keine Remote-Schriftarten. Android-Release enthält keine `INTERNET`-Berechtigung. Android-Debug/Profile benötigen sie für Flutter-Werkzeuge. Die App speichert Quellenfreigabe und Filter lokal. Sicherheitskopien des Betriebssystems beziehungsweise die Herkunft einer freigegebenen Datei sind vom App-Code getrennt zu betrachten.
+The app has no server connection, telemetry, account, or remote fonts. Android release builds have no `INTERNET` permission; debug/profile builds require it for Flutter tooling. The source grant and filters are stored locally. Operating-system backups and the origin of a user-selected file are outside the app's control.
 
-Öffentliche Quellen enthalten keine Originaldatenbank und keine privaten Schlüssel. Der iOS-Privacy-Manifest beschreibt die verwendeten lokalen APIs; vor einer Store-Einreichung mit dem tatsächlich erzeugten Archiv erneut prüfen.
+Public source files contain no original database and no private keys. The iOS privacy manifest describes the local APIs in use and must be checked again against the final archive before store submission.

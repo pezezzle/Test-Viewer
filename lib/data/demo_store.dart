@@ -12,7 +12,7 @@ class DemoViewerStore implements ViewerStore {
   @override
   Future<SourceConfiguration> configuration() async =>
       const SourceConfiguration(
-        folder: 'Fiktive Beispieldaten',
+        folder: 'Synthetic sample data',
         path: 'demo',
         configured: true,
         sourceId: 'demo',
@@ -30,7 +30,7 @@ class DemoViewerStore implements ViewerStore {
 
   @override
   Future<InspectionSnapshot> read() async {
-    final customers = {'0001': 'Musterbetrieb', '0002': 'Beispielwerkstatt'};
+    final customers = {'0001': 'Sample Company', '0002': 'Example Workshop'};
     final rows = List.generate(80, (index) {
       final offset = index % 9 == 0 ? -60 : index * 27 - 25;
       final date = DateTime.utc(
@@ -43,37 +43,36 @@ class DemoViewerStore implements ViewerStore {
         'CustomerNumber': index < 65 ? '0001' : '0002',
         'IDNumber': '${1000000 + index}',
         'Location': [
-          'Werkstatt',
-          'Küche',
-          'Zimmer 2',
-          'Zimmer 10',
+          'Workshop',
+          'Kitchen',
+          'Room 2',
+          'Room 10',
           '',
-          'Haus A / 1. OG',
+          'Building A / Floor 1',
         ][index % 6],
         'DeviceDescription': [
-          'Bohrmaschine',
-          'Ventilator',
+          'Power drill',
+          'Fan',
           'Monitor',
-          'Kaffeemaschine',
-          'Staubsauger',
+          'Coffee machine',
+          'Vacuum cleaner',
         ][index % 5],
-        'Manufacturer': 'Beispielhersteller',
-        'Type': 'Modell ${index % 4 + 1}',
+        'Manufacturer': 'Sample Manufacturer',
+        'Type': 'Model ${index % 4 + 1}',
         'LastTest': reference.monthStart(-12).iso,
         'NextTest': index % 17 == 0 ? '' : next,
         'TestResult': index % 23 == 0 ? 'F' : 'OK',
         'TestInterval': '12',
         'Class': 'I',
         'FactoryNumber': 'DEMO-$index',
-        'Remark':
-            'Fiktiver Datensatz. Nicht für echte Prüfentscheidungen verwenden.',
+        'Remark': 'Synthetic record. Do not use for real inspection decisions.',
       };
       return DeviceRecord(raw, customers);
     });
     return InspectionSnapshot(
       devices: rows,
       customers: customers,
-      sourceLabel: 'DEMO · ausschliesslich fiktive Geräte',
+      sourceLabel: 'DEMO · synthetic devices only',
       sourceId: 'demo',
       readAt: DateTime.now().toIso8601String(),
     );

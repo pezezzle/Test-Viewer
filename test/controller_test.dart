@@ -81,23 +81,23 @@ void main() {
   });
   test('Settings restore multiple locations and forecast horizon', () async {
     store.settings = {
-      'locations': ['Werkstatt', 'Küche'],
+      'locations': ['Workshop', 'Kitchen'],
       'horizonMonths': 60,
       'pageSize': 5,
       'referenceDate': '2027-01-01',
     };
     await controller.initialize();
-    expect(controller.filters.locations, {'Werkstatt', 'Küche'});
+    expect(controller.filters.locations, {'Workshop', 'Kitchen'});
     expect(controller.filters.horizonMonths, 60);
     expect(controller.pageRows.length, 5);
     expect(controller.reference, const CalendarDay(2027, 1, 1));
   });
   test('Drill down retains selected locations', () async {
     await controller.initialize();
-    controller.setLocations({'Werkstatt', 'Küche'});
+    controller.setLocations({'Workshop', 'Kitchen'});
     controller.openFiltered(due: 'overdue');
     expect(controller.tab, 1);
-    expect(controller.filters.locations, {'Werkstatt', 'Küche'});
+    expect(controller.filters.locations, {'Workshop', 'Kitchen'});
     expect(
       controller.filtered.every(
         (row) => row.due(controller.reference) == DueStatus.overdue,
@@ -127,7 +127,7 @@ void main() {
   });
   test('Customer heading is derived from the selected devices', () async {
     await controller.initialize();
-    expect(controller.customerHeading, '2 Kunden');
+    expect(controller.customerHeading, '2 customers');
     controller.snapshot = InspectionSnapshot(
       devices: [
         DeviceRecord(

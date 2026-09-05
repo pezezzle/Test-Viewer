@@ -10,9 +10,9 @@ final class SnapshotReader {
         let path = try DatabasePath.normalize(relativePath)
         let root = folder.standardizedFileURL.resolvingSymlinksInPath()
         let source = folder.appendingPathComponent(path).standardizedFileURL.resolvingSymlinksInPath()
-        guard source.path.hasPrefix(root.path + "/") else { throw ViewerReadError.invalid("Der Datenbankpfad liegt ausserhalb des freigegebenen Ordners.") }
+        guard source.path.hasPrefix(root.path + "/") else { throw ViewerReadError.invalid("The database path is outside the shared folder.") }
         var isDirectory: ObjCBool = false
-        guard manager.fileExists(atPath: source.path, isDirectory: &isDirectory), !isDirectory.boolValue else { throw ViewerReadError.invalid("Datenbank nicht gefunden: \(path). Bitte Ordner und Dateiname prüfen.") }
+        guard manager.fileExists(atPath: source.path, isDirectory: &isDirectory), !isDirectory.boolValue else { throw ViewerReadError.invalid("Database not found: \(path). Check the folder and file name.") }
         let coordinator = NSFileCoordinator(filePresenter: nil)
         var coordinationError: NSError?
         var outcome: Result<[String: Any], Error>?
@@ -20,7 +20,7 @@ final class SnapshotReader {
             outcome = Result { try self.makeSnapshot(source: coordinated, label: folder.lastPathComponent + "/" + path, identity: source.absoluteString) }
         }
         if let error = coordinationError { throw error }
-        guard let result = outcome else { throw ViewerReadError.invalid("Die ausgewählte Datei ist nicht lokal lesbar.") }
+        guard let result = outcome else { throw ViewerReadError.invalid("The selected file cannot be read locally.") }
         return try result.get()
     }
 
@@ -34,11 +34,11 @@ final class SnapshotReader {
         try assertQuiet(source)
         let second = try hash(source, copyTo: nil)
         try assertQuiet(source)
-        guard first == second else { throw ViewerReadError.invalid("Die Prüf-App hat die Datenbank während des Einlesens verändert. Prüfung speichern und erneut aktualisieren.") }
+        guard first == second else { throw ViewerReadError.invalid("The inspection app changed the database while it was being read. Save the inspection and refresh again.") }
         let headerHandle = try FileHandle(forReadingFrom: copy)
         let header = try headerHandle.read(upToCount: 16) ?? Data()
         try headerHandle.close()
-        guard header == Data("SQLite format 3\0".utf8) else { throw ViewerReadError.invalid("Die ausgewählte Datei ist keine SQLite-Datenbank.") }
+        guard header == Data("SQLite format 3\0".utf8) else { throw ViewerReadError.invalid("The selected file is not an SQLite database.") }
         let database = try DeviceDatabase(path: copy.path)
         var result = try database.read()
         let dateFormatter = DateFormatter()
@@ -68,7 +68,7 @@ final class SnapshotReader {
                 try handle.close()
                 if header.allSatisfy({ $0 == 0 }) { continue }
             }
-            throw ViewerReadError.invalid("Die Prüfsoftware hält noch eine SQLite-Journaldatei offen (\(suffix)). Prüfung speichern, Prüf-App vollständig schliessen und erneut aktualisieren. Journaldateien nicht löschen.")
+            throw ViewerReadError.invalid("The inspection software still has an SQLite journal file open (\(suffix)). Save the inspection, fully close the inspection app, and refresh again. Never delete journal files.")
         }
     }
 
@@ -77,7 +77,7 @@ final class SnapshotReader {
         defer { try? input.close() }
         var output: FileHandle?
         if let target = target {
-            guard manager.createFile(atPath: target.path, contents: nil, attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]) else { throw ViewerReadError.invalid("Die temporäre Lesekopie konnte nicht angelegt werden.") }
+            guard manager.createFile(atPath: target.path, contents: nil, attributes: [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]) else { throw ViewerReadError.invalid("The temporary read copy could not be created.") }
             output = try FileHandle(forWritingTo: target)
         }
         defer { try? output?.close() }
@@ -85,11 +85,11 @@ final class SnapshotReader {
         var total = 0
         while let data = try input.read(upToCount: 65536), !data.isEmpty {
             total += data.count
-            guard total <= maxBytes else { throw ViewerReadError.invalid("Die Datenbank ist grösser als 512 MB.") }
+            guard total <= maxBytes else { throw ViewerReadError.invalid("The database is larger than 512 MB.") }
             digest.update(data: data)
             try output?.write(contentsOf: data)
         }
-        guard total >= 100 else { throw ViewerReadError.invalid("Die ausgewählte Datei ist keine gültige SQLite-Datenbank.") }
+        guard total >= 100 else { throw ViewerReadError.invalid("The selected file is not a valid SQLite database.") }
         return Data(digest.finalize())
     }
 }

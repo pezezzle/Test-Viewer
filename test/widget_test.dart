@@ -24,7 +24,7 @@ void main() {
       expect(find.byKey(const ValueKey('brand-logo')), findsOneWidget);
       expect(find.textContaining('Test-Master'), findsWidgets);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.text('Geräte').first);
+      await tester.tap(find.text('Devices').first);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('device-search')), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -43,17 +43,17 @@ void main() {
       '2027-01-15',
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Übernehmen'));
-    await tester.tap(find.widgetWithText(FilledButton, 'Übernehmen'));
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Apply'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Apply'));
     await tester.pumpAndSettle();
     expect(find.text('15.01.2027'), findsOneWidget);
-    expect(find.text('STICHTAG · MANUELL'), findsOneWidget);
+    expect(find.text('REFERENCE DATE · MANUAL'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('reference-date-button')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Heute · automatisch'));
-    await tester.tap(find.text('Heute · automatisch'));
+    await tester.ensureVisible(find.text('Today · automatic'));
+    await tester.tap(find.text('Today · automatic'));
     await tester.pumpAndSettle();
-    expect(find.text('STICHTAG · AUTO'), findsOneWidget);
+    expect(find.text('REFERENCE DATE · AUTO'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
@@ -64,15 +64,15 @@ void main() {
       (tester) async {
         await tester.pumpWidget(TestMasterApp(store: DemoViewerStore()));
         await tester.pumpAndSettle();
-        await tester.tap(find.widgetWithText(OutlinedButton, 'Datenbank'));
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Database'));
         await tester.pumpAndSettle();
         await tester.enterText(
           find.byKey(const ValueKey('database-path')),
           'example.sqlite3',
         );
         final action = save
-            ? find.widgetWithText(FilledButton, 'Pfad speichern & laden')
-            : find.widgetWithText(OutlinedButton, 'Schliessen');
+            ? find.widgetWithText(FilledButton, 'Save path & load')
+            : find.widgetWithText(OutlinedButton, 'Close');
         await tester.ensureVisible(action);
         await tester.tap(action);
         await tester.pumpAndSettle();
@@ -89,18 +89,18 @@ void main() {
   ) async {
     await tester.pumpWidget(TestMasterApp(store: DemoViewerStore()));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Alle Standorte'));
+    await tester.tap(find.widgetWithText(OutlinedButton, 'All locations'));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const ValueKey('location-search')),
-      'Zimmer',
+      'Room',
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Treffer auswählen'));
+    await tester.tap(find.text('Select results'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Übernehmen'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Apply'));
     await tester.pumpAndSettle();
-    expect(find.text('2 Standorte ausgewählt'), findsOneWidget);
+    expect(find.text('2 locations selected'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });

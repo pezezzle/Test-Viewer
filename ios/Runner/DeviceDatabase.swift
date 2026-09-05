@@ -14,7 +14,7 @@ final class DeviceDatabase {
     init(path: String) throws {
         guard sqlite3_open_v2(path, &database, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, nil) == SQLITE_OK else {
             if database != nil { sqlite3_close(database); database = nil }
-            throw ViewerReadError.invalid("Die Datenbankkopie konnte nicht geöffnet werden.")
+            throw ViewerReadError.invalid("The database copy could not be opened.")
         }
         sqlite3_busy_timeout(database, 1000)
         sqlite3_exec(database, "PRAGMA trusted_schema=OFF", nil, nil, nil)
@@ -23,12 +23,12 @@ final class DeviceDatabase {
 
     private func query(_ sql: String, maximum: Int = 200000) throws -> [[String: Any]] {
         var statement: OpaquePointer?
-        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK else { throw ViewerReadError.invalid("Die erwarteten Prüfdaten konnten nicht gelesen werden.") }
+        guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK else { throw ViewerReadError.invalid("The expected inspection data could not be read.") }
         defer { sqlite3_finalize(statement) }
         var rows = [[String: Any]]()
         var status = sqlite3_step(statement)
         while status == SQLITE_ROW {
-            guard rows.count < maximum else { throw ViewerReadError.invalid("Die Datenbank enthält zu viele Einträge für diese mobile Auswertung.") }
+            guard rows.count < maximum else { throw ViewerReadError.invalid("The database contains too many records for mobile reporting.") }
             var row = [String: Any]()
             for index in 0..<sqlite3_column_count(statement) {
                 let name = String(cString: sqlite3_column_name(statement, index))
@@ -39,16 +39,16 @@ final class DeviceDatabase {
             rows.append(row)
             status = sqlite3_step(statement)
         }
-        guard status == SQLITE_DONE else { throw ViewerReadError.invalid("Beim Lesen der Datenbankkopie ist ein Fehler aufgetreten.") }
+        guard status == SQLITE_DONE else { throw ViewerReadError.invalid("An error occurred while reading the database copy.") }
         return rows
     }
 
     func read() throws -> [String: Any] {
         let check = try query("PRAGMA quick_check(1)", maximum: 100)
-        guard (check.first?["quick_check"] as? String)?.lowercased() == "ok" else { throw ViewerReadError.invalid("Die Datenbankkopie ist nicht konsistent. Prüfung speichern, Prüf-App schliessen und erneut aktualisieren. Die Originaldatei wurde nicht verändert.") }
+        guard (check.first?["quick_check"] as? String)?.lowercased() == "ok" else { throw ViewerReadError.invalid("The database copy is inconsistent. Save the inspection, close the inspection app, and refresh again. The source file was not modified.") }
         let available = Set(try query("PRAGMA table_info(tblIDNumbers)", maximum: 1000).compactMap { $0["name"] as? String })
         for required in ["CustomerNumber", "IDNumber", "Location", "DeviceDescription", "NextTest"] {
-            guard available.contains(required) else { throw ViewerReadError.invalid("Diese Datei hat nicht die erwartete Geräte-Datenstruktur (tblIDNumbers / \(required)).") }
+            guard available.contains(required) else { throw ViewerReadError.invalid("This file does not have the expected device schema (tblIDNumbers / \(required)).") }
         }
         let projection = Self.columns.map { available.contains($0) ? "\"\($0)\"" : "NULL AS \"\($0)\"" }.joined(separator: ",")
         let devices = try query("SELECT \(projection) FROM tblIDNumbers")
@@ -66,8 +66,8 @@ final class DeviceDatabase {
 enum DatabasePath {
     static func normalize(_ value: String) throws -> String {
         let path = value.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\\", with: "/")
-        guard !path.isEmpty, !path.hasPrefix("/"), !path.contains(":"), !path.contains("\0"), path.count <= 500 else { throw ViewerReadError.invalid("Bitte einen Dateinamen oder relativen Pfad im gewählten Ordner eingeben.") }
-        guard !path.components(separatedBy: "/").contains(where: { $0.isEmpty || $0 == "." || $0 == ".." }) else { throw ViewerReadError.invalid("Der Datenbankpfad enthält einen ungültigen Ordnerabschnitt.") }
+        guard !path.isEmpty, !path.hasPrefix("/"), !path.contains(":"), !path.contains("\0"), path.count <= 500 else { throw ViewerReadError.invalid("Enter a file name or relative path inside the selected folder.") }
+        guard !path.components(separatedBy: "/").contains(where: { $0.isEmpty || $0 == "." || $0 == ".." }) else { throw ViewerReadError.invalid("The database path contains an invalid folder segment.") }
         return path
     }
 }

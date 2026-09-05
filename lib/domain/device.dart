@@ -41,7 +41,7 @@ List<String> searchTokens(String query) => normalizeSearch(
   query,
 ).split(RegExp(r'\s+')).where((token) => token.isNotEmpty).toList();
 String locationLabel(String location) =>
-    location.isEmpty ? 'Ohne Standort' : location;
+    location.isEmpty ? 'No location' : location;
 
 /// Numeric-aware ordering keeps room 2 before room 10 without losing ID zeros.
 int naturalCompare(String left, String right) {
@@ -67,17 +67,17 @@ enum DueStatus { overdue, today, soon, medium, later, missing }
 String dueLabel(DueStatus status, {bool manual = false}) {
   switch (status) {
     case DueStatus.overdue:
-      return 'Überfällig';
+      return 'Overdue';
     case DueStatus.today:
-      return manual ? 'Am Stichtag fällig' : 'Heute fällig';
+      return manual ? 'Due on reference date' : 'Due today';
     case DueStatus.soon:
-      return 'In 1–30 Tagen';
+      return 'In 1–30 days';
     case DueStatus.medium:
-      return 'In 31–90 Tagen';
+      return 'In 31–90 days';
     case DueStatus.later:
-      return 'Später';
+      return 'Later';
     case DueStatus.missing:
-      return 'Ohne gültigen Termin';
+      return 'No valid due date';
   }
 }
 
@@ -104,8 +104,8 @@ class DeviceRecord {
     return name.isNotEmpty
         ? name
         : number.trim().isNotEmpty
-        ? 'Kunde ${number.trim()}'
-        : 'Kunde nicht angegeben';
+        ? 'Customer ${number.trim()}'
+        : 'Customer not specified';
   }
 
   String value(String key) => fields[key] ?? '';
@@ -113,7 +113,7 @@ class DeviceRecord {
   String get customerNumber => value('CustomerNumber');
   String get location => value('Location').trim();
   String get description => value('DeviceDescription').trim().isEmpty
-      ? 'Ohne Bezeichnung'
+      ? 'No description'
       : value('DeviceDescription');
   String get resultCode => value('TestResult').trim().toUpperCase();
   String get identity => '${customerNumber.length}:$customerNumber$id';
@@ -133,13 +133,13 @@ class DeviceRecord {
     final next = nextDay;
     if (next == null)
       return value('NextTest').trim().isEmpty
-          ? 'Kein Datum hinterlegt'
-          : 'Ungültiger Datumswert';
+          ? 'No date recorded'
+          : 'Invalid date value';
     final days = next.difference(reference);
-    if (days == 0) return manual ? 'Am Stichtag' : 'Am heutigen Tag';
+    if (days == 0) return manual ? 'On reference date' : 'Today';
     return days < 0
-        ? '${formatCount(-days)} Tage überfällig'
-        : 'In ${formatCount(days)} Tagen';
+        ? '${formatCount(-days)} days overdue'
+        : 'In ${formatCount(days)} days';
   }
 }
 

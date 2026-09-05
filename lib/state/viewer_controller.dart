@@ -81,7 +81,7 @@ class ViewerController extends ChangeNotifier {
     return numbers.length == 1
         ? DeviceRecord.resolveCustomer(numbers.first, data.customers)
         : numbers.length > 1
-        ? '${formatCount(numbers.length)} Kunden'
+        ? '${formatCount(numbers.length)} customers'
         : 'Test Viewer';
   }
 
@@ -253,7 +253,7 @@ class ViewerController extends ChangeNotifier {
     ) {
       if (!_disposed) {
         persistenceWarning =
-            'Die Einstellungen konnten nicht gespeichert werden: ${_message(exception)}';
+            'The settings could not be saved: ${_message(exception)}';
         _notify();
       }
     });
@@ -261,9 +261,9 @@ class ViewerController extends ChangeNotifier {
 
   Future<void> flushSettings() => _saveQueue;
   String _message(Object exception) => exception is PlatformException
-      ? exception.message ?? 'Der Datenbankzugriff ist fehlgeschlagen.'
+      ? exception.message ?? 'Database access failed.'
       : exception is MissingPluginException
-      ? 'Der Dateizugriff ist nur im Android- oder iOS-Build verfügbar.'
+      ? 'File access is available only in Android or iOS builds.'
       : exception.toString();
   void _notify() {
     if (!_disposed) notifyListeners();

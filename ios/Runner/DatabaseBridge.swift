@@ -11,18 +11,18 @@ final class DatabaseBridge: NSObject, UIDocumentPickerDelegate {
     func register(messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(name: "com.pezezzle.testmasterviewer/data", binaryMessenger: messenger)
         channel?.setMethodCallHandler { [weak self] call, result in
-            guard let self = self else { result(FlutterError(code: "closed", message: "Die Dateianbindung wurde beendet.", details: nil)); return }
+            guard let self = self else { result(FlutterError(code: "closed", message: "The file integration was closed.", details: nil)); return }
             do {
                 switch call.method {
                 case "configuration": result(try self.json(self.configuration()))
                 case "loadSettings": result(self.defaults.string(forKey: "flutterFilters") ?? "{}")
                 case "saveSettings":
-                    guard let text = call.arguments as? String, text.utf8.count <= 1024 * 1024, let data = text.data(using: .utf8), (try JSONSerialization.jsonObject(with: data)) is [String: Any] else { throw ViewerReadError.invalid("Ungültige Einstellungen.") }
+                    guard let text = call.arguments as? String, text.utf8.count <= 1024 * 1024, let data = text.data(using: .utf8), (try JSONSerialization.jsonObject(with: data)) is [String: Any] else { throw ViewerReadError.invalid("Invalid settings.") }
                     self.defaults.set(text, forKey: "flutterFilters")
                     result(nil)
                 case "chooseFolder": try self.chooseFolder(result)
                 case "savePath":
-                    guard let path = call.arguments as? String else { throw ViewerReadError.invalid("Bitte einen Dateinamen eingeben.") }
+                    guard let path = call.arguments as? String else { throw ViewerReadError.invalid("Enter a file name.") }
                     self.defaults.set(try DatabasePath.normalize(path), forKey: "path")
                     result(try self.json(self.configuration()))
                 case "readSnapshot": self.readSnapshot(result)
@@ -33,7 +33,7 @@ final class DatabaseBridge: NSObject, UIDocumentPickerDelegate {
     }
 
     private func resolveFolder() throws -> URL {
-        guard let bookmark = defaults.data(forKey: "folderBookmark") else { throw ViewerReadError.invalid("Bitte zuerst den Datenbankordner auswählen.") }
+        guard let bookmark = defaults.data(forKey: "folderBookmark") else { throw ViewerReadError.invalid("Select the database folder first.") }
         var stale = false
         let folder = try URL(resolvingBookmarkData: bookmark, options: .withoutUI, relativeTo: nil, bookmarkDataIsStale: &stale)
         if stale {
@@ -59,8 +59,8 @@ final class DatabaseBridge: NSObject, UIDocumentPickerDelegate {
     }
 
     private func chooseFolder(_ result: @escaping FlutterResult) throws {
-        guard pickerResult == nil else { throw ViewerReadError.invalid("Die Ordnerauswahl ist bereits geöffnet.") }
-        guard let presenter = presenter() else { throw ViewerReadError.invalid("Die iOS-Dateiauswahl ist noch nicht bereit.") }
+        guard pickerResult == nil else { throw ViewerReadError.invalid("The folder picker is already open.") }
+        guard let presenter = presenter() else { throw ViewerReadError.invalid("The iOS file picker is not ready yet.") }
         pickerResult = result
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder], asCopy: false)
         picker.allowsMultipleSelection = false
@@ -103,7 +103,7 @@ final class DatabaseBridge: NSObject, UIDocumentPickerDelegate {
 
     private func json(_ value: [String: Any]) throws -> String {
         let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
-        guard let result = String(data: data, encoding: .utf8) else { throw ViewerReadError.invalid("Die Prüfdaten konnten nicht übertragen werden.") }
+        guard let result = String(data: data, encoding: .utf8) else { throw ViewerReadError.invalid("The inspection data could not be transferred.") }
         return result
     }
     private func fail(_ result: FlutterResult, _ error: Error) { result(FlutterError(code: "viewer", message: error.localizedDescription, details: nil)) }

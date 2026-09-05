@@ -12,8 +12,8 @@ if args.count > 1 {
         exit(2)
     }
 } else {
-    let valid = ["pcdrdata.sqlite3", "Prüfungen/pcdrdata.sqlite3", " Ordner\\db.sqlite "]
-    let expected = ["pcdrdata.sqlite3", "Prüfungen/pcdrdata.sqlite3", "Ordner/db.sqlite"]
+    let valid = ["pcdrdata.sqlite3", "Inspections/pcdrdata.sqlite3", " Folder\\db.sqlite "]
+    let expected = ["pcdrdata.sqlite3", "Inspections/pcdrdata.sqlite3", "Folder/db.sqlite"]
     for (index, path) in valid.enumerated() { precondition(try! DatabasePath.normalize(path) == expected[index]) }
     let invalid = ["", "/db.sqlite", "../db", "x/../db", "x/./db", "x//db", "x/", "C:\\db", "x\0db", String(repeating: "a", count: 501)]
     for path in invalid {

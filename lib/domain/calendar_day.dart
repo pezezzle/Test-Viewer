@@ -68,16 +68,16 @@ class CalendarDay implements Comparable<CalendarDay> {
 const monthNames = [
   'Jan',
   'Feb',
-  'Mär',
+  'Mar',
   'Apr',
-  'Mai',
+  'May',
   'Jun',
   'Jul',
   'Aug',
   'Sep',
-  'Okt',
+  'Oct',
   'Nov',
-  'Dez',
+  'Dec',
 ];
 String monthLabel(CalendarDay value) =>
     '${monthNames[value.month - 1]} ${value.year}';

@@ -54,8 +54,8 @@ Future<void> showLocations(
             )
             .toList();
         final selectionLabel = selected.isEmpty
-            ? 'Alle Standorte'
-            : '${selected.length} ausgewählt';
+            ? 'All locations'
+            : '${selected.length} selected';
         final availableHeight =
             MediaQuery.sizeOf(context).height -
             MediaQuery.viewInsetsOf(context).bottom -
@@ -74,7 +74,7 @@ Future<void> showLocations(
                       children: [
                         const Expanded(
                           child: Text(
-                            'Standorte auswählen',
+                            'Select locations',
                             style: TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.w600,
@@ -82,7 +82,7 @@ Future<void> showLocations(
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Schliessen',
+                          tooltip: 'Close',
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.close),
                         ),
@@ -92,12 +92,12 @@ Future<void> showLocations(
                       key: const ValueKey('location-search'),
                       controller: search,
                       decoration: InputDecoration(
-                        hintText: 'Standort suchen …',
+                        hintText: 'Search locations …',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: search.text.isEmpty
                             ? null
                             : IconButton(
-                                tooltip: 'Suche leeren',
+                                tooltip: 'Clear search',
                                 onPressed: () => setState(search.clear),
                                 icon: const Icon(Icons.close),
                               ),
@@ -109,13 +109,13 @@ Future<void> showLocations(
                       children: [
                         TextButton(
                           onPressed: () => setState(selected.clear),
-                          child: const Text('Alle Standorte'),
+                          child: const Text('All locations'),
                         ),
                         TextButton(
                           onPressed: matches.isEmpty
                               ? null
                               : () => setState(() => selected.addAll(matches)),
-                          child: const Text('Treffer auswählen'),
+                          child: const Text('Select results'),
                         ),
                       ],
                     ),
@@ -136,7 +136,7 @@ Future<void> showLocations(
                         math.min(620.0, availableHeight) - 320,
                       ),
                       child: matches.isEmpty
-                          ? const Center(child: Text('Kein Standort gefunden.'))
+                          ? const Center(child: Text('No location found.'))
                           : ListView.builder(
                               itemCount: matches.length,
                               itemBuilder: (context, index) {
@@ -150,7 +150,7 @@ Future<void> showLocations(
                                   title: Text(locationLabel(location)),
                                   subtitle: !counts.containsKey(location)
                                       ? const Text(
-                                          'Nicht im aktuellen Datenstand',
+                                          'Not in the current snapshot',
                                         )
                                       : null,
                                   secondary: Text(
@@ -174,7 +174,7 @@ Future<void> showLocations(
                         Expanded(
                           child: Text(
                             selected.isEmpty
-                                ? 'Keine Einschränkung'
+                                ? 'No restriction'
                                 : '${selected.length} Standorte',
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -184,7 +184,7 @@ Future<void> showLocations(
                             controller.setLocations(selected);
                             Navigator.pop(context);
                           },
-                          child: const Text('Übernehmen'),
+                          child: const Text('Apply'),
                         ),
                       ],
                     ),
@@ -225,7 +225,7 @@ Future<void> showReferenceDate(
                     children: [
                       const Expanded(
                         child: Text(
-                          'Stichtag wählen',
+                          'Select reference date',
                           style: TextStyle(
                             fontSize: 21,
                             fontWeight: FontWeight.w600,
@@ -234,13 +234,13 @@ Future<void> showReferenceDate(
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        tooltip: 'Schliessen',
+                        tooltip: 'Close',
                         icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
                   const Text(
-                    'Fälligkeiten und Vorschau werden für diesen Tag berechnet. Die Prüfdaten bleiben unverändert.',
+                    'Due dates and forecasts are calculated for this date. Inspection data remains unchanged.',
                     style: TextStyle(color: ViewerColors.muted, fontSize: 13),
                   ),
                   const SizedBox(height: 15),
@@ -249,7 +249,7 @@ Future<void> showReferenceDate(
                     controller: input,
                     keyboardType: TextInputType.datetime,
                     decoration: InputDecoration(
-                      labelText: 'Datum (JJJJ-MM-TT)',
+                      labelText: 'Date (YYYY-MM-DD)',
                       hintText: '2026-09-05',
                       errorText: error,
                     ),
@@ -278,7 +278,7 @@ Future<void> showReferenceDate(
                     }),
                   ),
                   const Text(
-                    'Ein manuelles Datum bleibt gespeichert. „Heute · automatisch“ folgt wieder dem Tagesdatum.',
+                    'A manual date remains saved. “Today · automatic” follows the current date again.',
                     style: TextStyle(fontSize: 12, color: ViewerColors.muted),
                   ),
                   const SizedBox(height: 16),
@@ -292,7 +292,7 @@ Future<void> showReferenceDate(
                           controller.setReference(null);
                           Navigator.pop(context);
                         },
-                        child: const Text('Heute · automatisch'),
+                        child: const Text('Today · automatic'),
                       ),
                       FilledButton(
                         onPressed: () {
@@ -300,14 +300,14 @@ Future<void> showReferenceDate(
                           if (date == null) {
                             setState(
                               () => error =
-                                  'Gültiges Datum zwischen 1900 und 9999 eingeben.',
+                                  'Enter a valid date between 1900 and 9999.',
                             );
                             return;
                           }
                           controller.setReference(date);
                           Navigator.pop(context);
                         },
-                        child: const Text('Übernehmen'),
+                        child: const Text('Apply'),
                       ),
                     ],
                   ),
@@ -352,7 +352,7 @@ Future<void> showSourceSettings(
                         children: [
                           const Expanded(
                             child: Text(
-                              'Datenbank festlegen',
+                              'Configure database',
                               style: TextStyle(
                                 fontSize: 21,
                                 fontWeight: FontWeight.w600,
@@ -360,7 +360,7 @@ Future<void> showSourceSettings(
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Schliessen',
+                            tooltip: 'Close',
                             onPressed: working
                                 ? null
                                 : () => Navigator.pop(context),
@@ -370,12 +370,12 @@ Future<void> showSourceSettings(
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Wähle den Ordner mit deiner Prüf-Datenbank. Der erteilte Zugriff wird für spätere Starts gespeichert.',
+                        'Choose the folder containing your inspection database. The granted access is saved for future launches.',
                         style: TextStyle(color: ViewerColors.muted),
                       ),
                       const SizedBox(height: 18),
                       const Text(
-                        'Freigegebener Ordner',
+                        'Shared folder',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -384,7 +384,7 @@ Future<void> showSourceSettings(
                       const SizedBox(height: 6),
                       SelectableText(
                         controller.config.folder.isEmpty
-                            ? 'Noch kein Ordner gewählt'
+                            ? 'No folder selected yet'
                             : controller.config.folder,
                         style: const TextStyle(fontSize: 13),
                       ),
@@ -410,7 +410,7 @@ Future<void> showSourceSettings(
                                     setState(() => working = false);
                                 },
                           icon: const Icon(Icons.folder_open),
-                          label: const Text('Ordner wählen'),
+                          label: const Text('Choose folder'),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -421,13 +421,13 @@ Future<void> showSourceSettings(
                         autocorrect: false,
                         enableSuggestions: false,
                         decoration: const InputDecoration(
-                          labelText: 'Dateiname oder relativer Pfad',
+                          labelText: 'File name or relative path',
                           hintText: 'pcdrdata.sqlite3',
                         ),
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Beispiele: pcdrdata.sqlite3 oder Prüfungen/pcdrdata.sqlite3. Es wird immer aus dem freigegebenen Ordner gelesen, nicht aus einer dauerhaft importierten Kopie.',
+                        'Examples: pcdrdata.sqlite3 or Inspections/pcdrdata.sqlite3. Data is always read from the shared folder, never from a permanently imported copy.',
                         style: TextStyle(
                           fontSize: 12,
                           color: ViewerColors.muted,
@@ -441,7 +441,7 @@ Future<void> showSourceSettings(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text(
-                          'Prüfung fertig speichern und diese Übersicht öffnen. Bei einer Journal-Meldung die Prüf-App vollständig schliessen und erneut aktualisieren. Journaldateien nicht löschen.',
+                          'Finish and save the inspection, then open this viewer. If a journal warning appears, fully close the inspection app and refresh again. Never delete journal files.',
                           style: TextStyle(fontSize: 13),
                         ),
                       ),
@@ -468,7 +468,7 @@ Future<void> showSourceSettings(
                             onPressed: working
                                 ? null
                                 : () => Navigator.pop(context),
-                            child: const Text('Schliessen'),
+                            child: const Text('Close'),
                           ),
                           FilledButton(
                             onPressed: working || !controller.config.configured
@@ -496,13 +496,13 @@ Future<void> showSourceSettings(
                                     if (context.mounted)
                                       setState(() => working = false);
                                   },
-                            child: const Text('Pfad speichern & laden'),
+                            child: const Text('Save path & load'),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
                       const Text(
-                        'Nur Anzeige · Kein Upload · Keine Cloud-Verbindung der App',
+                        'View only · No upload · No cloud connection',
                         style: TextStyle(
                           fontSize: 11,
                           color: ViewerColors.muted,
@@ -529,28 +529,28 @@ Future<void> showDeviceDetails(
   ViewerController controller,
 ) async {
   final labels = <String, String>{
-    'CustomerNumber': 'Kundennummer',
-    'IDNumber': 'Geräte-Nr.',
-    'Location': 'Standort',
-    'DeviceDescription': 'Bezeichnung',
-    'Manufacturer': 'Hersteller',
-    'Type': 'Typ',
-    'FactoryNumber': 'Seriennummer',
-    'Class': 'Schutzklasse',
-    'Standard': 'Norm',
-    'SubStandard': 'Zusatznorm',
-    'LastTest': 'Letzte Prüfung',
-    'NextTest': 'Nächste Prüfung',
-    'TestInterval': 'Prüfintervall (Originalwert)',
-    'TestResult': 'Ergebniscode',
-    'Status': 'Statuscode',
-    'User1': 'Benutzerfeld 1',
-    'User2': 'Benutzerfeld 2',
-    'User3': 'Benutzerfeld 3',
-    'Remark': 'Bemerkung',
+    'CustomerNumber': 'Customer number',
+    'IDNumber': 'Device no.',
+    'Location': 'Location',
+    'DeviceDescription': 'Description',
+    'Manufacturer': 'Manufacturer',
+    'Type': 'Type',
+    'FactoryNumber': 'Serial number',
+    'Class': 'Protection class',
+    'Standard': 'Standard',
+    'SubStandard': 'Additional standard',
+    'LastTest': 'Last inspection',
+    'NextTest': 'Next inspection',
+    'TestInterval': 'Inspection interval (original value)',
+    'TestResult': 'Result code',
+    'Status': 'Status code',
+    'User1': 'User field 1',
+    'User2': 'User field 2',
+    'User3': 'User field 3',
+    'Remark': 'Remark',
   };
   final fields = <MapEntry<String, String>>[
-    MapEntry('Kunde', device.customerName),
+    MapEntry('Customer', device.customerName),
     ...labels.entries.map(
       (entry) => MapEntry(
         entry.value,
@@ -578,12 +578,12 @@ Future<void> showDeviceDetails(
                   children: [
                     Expanded(
                       child: SectionTitle(
-                        label: 'Gerät ${device.id}',
+                        label: 'Device ${device.id}',
                         title: device.description,
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Schliessen',
+                      tooltip: 'Close',
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close),
                     ),
@@ -620,7 +620,7 @@ Future<void> showDeviceDetails(
                       children: [
                         for (final field in fields)
                           SizedBox(
-                            width: field.key == 'Bemerkung'
+                            width: field.key == 'Remark'
                                 ? constraints.maxWidth
                                 : width,
                             child: Column(
@@ -651,7 +651,7 @@ Future<void> showDeviceDetails(
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Eindeutige Zuordnung: Kundennummer + Geräte-Nr. · Nur Anzeige, keine Bearbeitung',
+                  'Unique identity: customer number + device no. · View only, no editing',
                   style: TextStyle(fontSize: 11, color: ViewerColors.muted),
                 ),
                 const SizedBox(height: 18),
@@ -659,7 +659,7 @@ Future<void> showDeviceDetails(
                   alignment: Alignment.centerRight,
                   child: FilledButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Schliessen'),
+                    child: const Text('Close'),
                   ),
                 ),
               ],

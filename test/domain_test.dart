@@ -95,11 +95,11 @@ void main() {
       expect(a.customerName, 'Example company');
     });
     test('Falls back to customer numbers, never fixed branding', () {
-      expect(DeviceRecord.resolveCustomer('0042', {}), 'Kunde 0042');
-      expect(DeviceRecord.resolveCustomer('', {}), 'Kunde nicht angegeben');
+      expect(DeviceRecord.resolveCustomer('0042', {}), 'Customer 0042');
+      expect(DeviceRecord.resolveCustomer('', {}), 'Customer not specified');
     });
     test('Normalizes search accents and multiple tokens', () {
-      expect(normalizeSearch('KÜCHE Straße'), 'kuche strasse');
+      expect(normalizeSearch('ÄÖÜß'), 'aouss');
       expect(searchTokens('  room   2 '), ['room', '2']);
     });
     test('Sorts numeric portions naturally', () {
@@ -147,7 +147,7 @@ void main() {
       device(
         '1',
         next: offset(-1),
-        location: 'Küche',
+        location: 'Kitchen',
         description: 'Monitor A',
         result: 'F',
       ),
@@ -162,7 +162,7 @@ void main() {
       device('4', next: 'invalid', location: 'Room 2'),
     ];
     test('Combines multiple locations using OR', () {
-      final filters = ViewerFilters(locations: {'Küche', 'Room 10'});
+      final filters = ViewerFilters(locations: {'Kitchen', 'Room 10'});
       expect(filterDevices(records, filters, reference).map((row) => row.id), [
         '1',
         '10',
@@ -173,13 +173,13 @@ void main() {
       expect(scopeDevices(records, {}).length, records.length);
     });
     test('Uses AND between search tokens', () {
-      final filters = ViewerFilters(search: 'MONITOR kuche');
+      final filters = ViewerFilters(search: 'MONITOR kitchen');
       expect(filterDevices(records, filters, reference).single.id, '1');
     });
     test('Search includes customer names', () {
       final filters = ViewerFilters(
         search: 'example company',
-        locations: {'Küche'},
+        locations: {'Kitchen'},
       );
       expect(filterDevices(records, filters, reference).single.id, '1');
     });

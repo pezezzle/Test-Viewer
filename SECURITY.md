@@ -1,9 +1,9 @@
-# Sicherheit
+# Security
 
-Keine Originaldatenbanken, echten Gerätelisten, privaten Signaturschlüssel, Passwörter oder personenbezogenen Screenshots in öffentliche Issues, Commits oder Actions-Logs einfügen. Für Fehlerberichte ausschliesslich fiktive Beispieldaten und bereinigte Logs verwenden.
+Never include original databases, real device inventories, private signing keys, passwords, or personal screenshots in issues, commits, or Actions logs. Use only synthetic sample data and sanitized logs in bug reports.
 
-Der Viewer nimmt keine Gerätesicherheitsbewertung vor und schreibt nicht in die Originaldatenbank. Datumsstatus und Ergebniscode sind getrennt. Ein „später fälliges“ Gerät kann trotzdem einen negativen Prüfcode besitzen.
+The viewer does not assess device safety and never writes to the source database. Due-date status and inspection result are separate: a device with a future due date can still have a failed inspection code.
 
-Das öffentliche Paket enthält keinen privaten Release-Key. Eine Schlüsseldatei gehört lokal in `signing/` oder in dafür vorgesehene geheime CI-Variablen. Eine `.gitignore` entfernt keine Dateien aus bereits vorhandener Git-Historie. Vor einer Veröffentlichung deshalb immer auch die Historie prüfen.
+The repository does not contain a private release key. Keep signing files outside version control or in dedicated CI secrets. A `.gitignore` rule cannot remove a secret from existing Git history, so always inspect the history before publication.
 
-Mögliche Sicherheitsprobleme zunächst privat mit dem Herausgeber klären; keine realen Prüfdaten zur Reproduktion veröffentlichen.
+Report potential security issues privately to the publisher first. Never publish real inspection data to reproduce a problem.

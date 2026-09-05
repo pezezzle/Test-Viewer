@@ -35,12 +35,12 @@ public final class SnapshotReader {
         String parentId = DocumentsContract.getTreeDocumentId(tree);
         for (int i = 0; i < parts.length - 1; i++) {
             Document folder = find(tree, parentId, parts[i]);
-            if (folder == null || !folder.directory) throw new IOException("Unterordner nicht gefunden: " + parts[i] + ". Bitte den Datenbankpfad prüfen.");
+            if (folder == null || !folder.directory) throw new IOException("Subfolder not found: " + parts[i] + ". Check the database path.");
             parentId = folder.id;
         }
         String fileName = parts[parts.length - 1];
         Document source = find(tree, parentId, fileName);
-        if (source == null || source.directory) throw new IOException("Datenbank nicht gefunden: " + path + ". Bitte den gewählten Ordner und Dateinamen prüfen.");
+        if (source == null || source.directory) throw new IOException("Database not found: " + path + ". Check the selected folder and file name.");
         assertQuiet(tree, parentId, fileName);
         Uri sourceUri = DocumentsContract.buildDocumentUriUsingTree(tree, source.id);
         File copy = File.createTempFile("testmaster-read-", ".sqlite3", context.getCacheDir());
@@ -51,16 +51,16 @@ public final class SnapshotReader {
             // A second complete read detects changes while the temporary snapshot was copied.
             byte[] secondHash = copyAndHash(sourceUri, null);
             assertQuiet(tree, parentId, fileName);
-            if (!MessageDigest.isEqual(firstHash, secondHash)) throw new IOException("Die Prüf-App hat die Datenbank während des Einlesens verändert. Bitte die Prüfung speichern, die Prüf-App pausieren und erneut aktualisieren.");
+            if (!MessageDigest.isEqual(firstHash, secondHash)) throw new IOException("The inspection app changed the database while it was being read. Save the inspection, pause the inspection app, and refresh again.");
             verifyHeader(copy);
             database = SQLiteDatabase.openDatabase(copy.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             try (Cursor check = database.rawQuery("PRAGMA quick_check(1)", null)) {
-                if (!check.moveToFirst() || !"ok".equalsIgnoreCase(check.getString(0))) throw new IOException("Die gelesene Datenbankkopie ist nicht konsistent. Bitte die Prüfung speichern, die Prüf-App vollständig schliessen und erneut aktualisieren. Die Originaldatei wurde nicht verändert.");
+                if (!check.moveToFirst() || !"ok".equalsIgnoreCase(check.getString(0))) throw new IOException("The database copy is inconsistent. Save the inspection, fully close the inspection app, and refresh again. The source file was not modified.");
             }
             Set<String> available = new HashSet<String>();
             try (Cursor schema = database.rawQuery("PRAGMA table_info(tblIDNumbers)", null)) { while (schema.moveToNext()) available.add(schema.getString(1)); }
             for (String required : new String[] { "CustomerNumber", "IDNumber", "Location", "DeviceDescription", "NextTest" }) {
-                if (!available.contains(required)) throw new IOException("Diese Datei hat nicht die erwartete Geräte-Datenstruktur (tblIDNumbers / " + required + "). Bitte pcdrdata.sqlite3 der Prüf-App auswählen.");
+                if (!available.contains(required)) throw new IOException("This file does not have the expected device schema (tblIDNumbers / " + required + "). Select pcdrdata.sqlite3 from the inspection app.");
             }
             StringBuilder sql = new StringBuilder("SELECT ");
             for (int i = 0; i < COLUMNS.length; i++) {
@@ -72,7 +72,7 @@ public final class SnapshotReader {
             JSONArray rows = new JSONArray();
             try (Cursor cursor = database.rawQuery(sql.toString(), null)) {
                 while (cursor.moveToNext()) {
-                    if (rows.length() >= 200000) throw new IOException("Mehr als 200’000 Geräte. Diese Datenbank ist für die mobile Auswertung zu gross.");
+                    if (rows.length() >= 200000) throw new IOException("More than 200,000 devices. This database is too large for mobile reporting.");
                     JSONObject row = new JSONObject();
                     for (int i = 0; i < COLUMNS.length; i++) row.put(COLUMNS[i], cursor.isNull(i) ? JSONObject.NULL : cursor.getString(i));
                     rows.put(row);
@@ -103,7 +103,7 @@ public final class SnapshotReader {
         Uri children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, parentId);
         String[] projection = { "document_id", "_display_name", "mime_type", "_size", "last_modified" };
         try (Cursor cursor = resolver.query(children, projection, null, null, null)) {
-            if (cursor == null) throw new IOException("Der Ordner kann nicht gelesen werden. Bitte die Ordnerfreigabe neu erteilen.");
+            if (cursor == null) throw new IOException("The folder cannot be read. Grant folder access again.");
             while (cursor.moveToNext()) {
                 if (name.equals(cursor.getString(1))) return new Document(cursor.getString(0), "vnd.android.document/directory".equals(cursor.getString(2)), cursor.isNull(3) ? -1 : cursor.getLong(3), cursor.isNull(4) ? 0 : cursor.getLong(4));
             }
@@ -112,13 +112,13 @@ public final class SnapshotReader {
     }
 
     private void assertQuiet(Uri tree, String parentId, String fileName) throws IOException {
-        if (Thread.currentThread().isInterrupted()) throw new IOException("Einlesen abgebrochen.");
+        if (Thread.currentThread().isInterrupted()) throw new IOException("Read cancelled.");
         for (String suffix : new String[] { "-wal", "-journal" }) {
             Document companion = find(tree, parentId, fileName + suffix);
             if (companion != null && companion.size != 0) {
                 // Inactive rollback journals may exist with an all-zero header. A WAL is never ignored.
                 if (suffix.equals("-journal") && isZeroJournal(DocumentsContract.buildDocumentUriUsingTree(tree, companion.id))) continue;
-                throw new IOException("Die Prüfsoftware hält noch eine SQLite-Journaldatei offen (" + suffix + "). Bitte die Prüfung speichern, die Prüf-App vollständig schliessen und danach aktualisieren. Journaldateien nicht löschen.");
+                throw new IOException("The inspection software still has an SQLite journal file open (" + suffix + "). Save the inspection, fully close the inspection app, and then refresh. Never delete journal files.");
             }
         }
     }
@@ -134,18 +134,18 @@ public final class SnapshotReader {
     private byte[] copyAndHash(Uri uri, File target) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (InputStream input = resolver.openInputStream(uri); FileOutputStream output = target == null ? null : new FileOutputStream(target)) {
-            if (input == null) throw new IOException("Die Datenbank konnte nicht geöffnet werden.");
+            if (input == null) throw new IOException("The database could not be opened.");
             byte[] buffer = new byte[65536];
             long total = 0;
             int count;
             while ((count = input.read(buffer)) != -1) {
-                if (Thread.currentThread().isInterrupted()) throw new IOException("Einlesen abgebrochen.");
+                if (Thread.currentThread().isInterrupted()) throw new IOException("Read cancelled.");
                 total += count;
-                if (total > MAX_BYTES) throw new IOException("Die Datenbank ist grösser als 512 MB. Diese App-Version ist für kleinere Prüfdatenbanken ausgelegt.");
+                if (total > MAX_BYTES) throw new IOException("The database is larger than 512 MB. This app version supports smaller inspection databases only.");
                 digest.update(buffer, 0, count);
                 if (output != null) output.write(buffer, 0, count);
             }
-            if (total < 100) throw new IOException("Die ausgewählte Datei ist keine gültige SQLite-Datenbank.");
+            if (total < 100) throw new IOException("The selected file is not a valid SQLite database.");
         }
         return digest.digest();
     }
@@ -154,15 +154,15 @@ public final class SnapshotReader {
         byte[] header = new byte[16];
         try (InputStream input = new java.io.FileInputStream(file)) {
             int count = input.read(header);
-            if (count != 16 || !Arrays.equals(header, "SQLite format 3\0".getBytes(java.nio.charset.StandardCharsets.US_ASCII))) throw new IOException("Die ausgewählte Datei ist keine unverschlüsselte SQLite-3-Datenbank.");
+            if (count != 16 || !Arrays.equals(header, "SQLite format 3\0".getBytes(java.nio.charset.StandardCharsets.US_ASCII))) throw new IOException("The selected file is not an unencrypted SQLite 3 database.");
         }
     }
 
     public static String friendlyError(Exception exception) {
-        if (exception instanceof SecurityException) return "Der gespeicherte Lesezugriff ist nicht mehr gültig. Bitte unter Datenbank den Ordner erneut auswählen.";
+        if (exception instanceof SecurityException) return "The saved read grant is no longer valid. Select the folder again under Database.";
         if (exception instanceof IOException) return exception.getMessage();
         String detail = exception.getMessage();
-        return "Die Datenbank konnte nicht eingelesen werden. Bitte die Prüf-App speichern und schliessen sowie den Datenbankpfad prüfen." + (detail == null ? "" : "\nTechnische Meldung: " + detail);
+        return "The database could not be read. Save and close the inspection app, then check the database path." + (detail == null ? "" : "\nTechnical message: " + detail);
     }
 
     private static final class Document {

@@ -1,13 +1,13 @@
-# Fiktive Beispieldaten
+# Synthetic sample data
 
-Die App bietet auf der Startseite **„Mit fiktiven Daten ausprobieren“**. Der Demomodus ist ausdrücklich gekennzeichnet und mischt sich nicht mit einer ausgewählten Datenbank.
+The welcome screen provides **Try with sample data**. Demo mode is clearly marked and never mixes its data with a selected database.
 
-Für einen echten Test der Android- oder iOS-Ordnerauswahl lässt sich zusätzlich eine SQLite-Datei mit ausschliesslich fiktiven Daten erzeugen:
+To test Android or iOS folder selection, create an additional SQLite file containing only synthetic data:
 
 ```sh
 python tool/create_demo_database.py example/demo.sqlite3
 ```
 
-Diese Datei in einen freigegebenen Ordner des Testgeräts kopieren. In der App diesen Ordner und `demo.sqlite3` auswählen. Die Datei wird von Git ignoriert. Der Generator überschreibt keine vorhandene Datei.
+Copy this file into a shared folder on the test device. Select that folder and `demo.sqlite3` in the app. Git ignores the generated file, and the generator never overwrites an existing file.
 
-Alle Personen-, Kunden-, Hersteller- und Gerätedaten des Beispiels sind erfunden. Sie sind kein Prüfprotokoll und nicht zur Beurteilung der Sicherheit von Geräten geeignet.
+Every person, customer, manufacturer, and device in the sample is fictional. The data is not an inspection report and must not be used to assess device safety.

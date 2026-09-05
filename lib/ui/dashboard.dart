@@ -26,48 +26,48 @@ class DashboardView extends StatelessWidget {
           })
         >[
           (
-            title: 'Geräte im Bestand',
+            title: 'Devices in inventory',
             count: counts.total,
-            subtitle: 'Im ausgewählten Bereich',
+            subtitle: 'In the selected scope',
             color: ViewerColors.brand,
             action: () => controller.openFiltered(),
           ),
           (
-            title: 'Überfällig',
+            title: 'Overdue',
             count: counts[DueStatus.overdue],
             subtitle: manual
-                ? 'Prüftermin vor dem Stichtag'
-                : 'Prüftermin vor heute',
+                ? 'Inspection due before the reference date'
+                : 'Inspection due before today',
             color: ViewerColors.overdue,
             action: () => controller.openFiltered(due: 'overdue'),
           ),
           (
-            title: 'Bis in 30 Tagen fällig',
+            title: 'Due within 30 days',
             count: counts.soon,
             subtitle: manual
-                ? 'Einschliesslich Stichtag'
-                : 'Einschliesslich heute',
+                ? 'Including the reference date'
+                : 'Including today',
             color: ViewerColors.soon,
             action: () => controller.openFiltered(due: 'soon'),
           ),
           (
-            title: 'In 31–90 Tagen fällig',
+            title: 'Due in 31–90 days',
             count: counts[DueStatus.medium],
-            subtitle: 'Nächster Planungszeitraum',
+            subtitle: 'Next planning period',
             color: ViewerColors.medium,
             action: () => controller.openFiltered(due: 'medium'),
           ),
           (
-            title: 'Ohne gültigen Termin',
+            title: 'No valid due date',
             count: counts[DueStatus.missing],
-            subtitle: 'In der Prüf-App prüfen',
+            subtitle: 'Check in the inspection app',
             color: ViewerColors.missing,
             action: () => controller.openFiltered(due: 'missing'),
           ),
           (
-            title: 'Ergebniscode F',
+            title: 'Result code F',
             count: counts.failed,
-            subtitle: 'Aktueller Geräteeintrag',
+            subtitle: 'Current device record',
             color: counts.failed > 0
                 ? ViewerColors.overdue
                 : ViewerColors.brand,
@@ -168,7 +168,7 @@ class DashboardView extends StatelessWidget {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 18),
           child: Text(
-            'Die Fälligkeit stammt aus „NextTest“. Fehlende Termine werden nicht aus dem Prüfintervall geschätzt. Ein zukünftiger Termin ist keine Aussage über die Betriebssicherheit.',
+            'Due dates come from “NextTest”. Missing dates are not estimated from the inspection interval. A future due date does not indicate operational safety.',
             style: TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
         ),
@@ -179,31 +179,31 @@ class DashboardView extends StatelessWidget {
   Widget _duePanel(BuildContext context, DashboardCounts counts, bool manual) {
     final parts = <({String label, int value, Color color, String filter})>[
       (
-        label: 'Überfällig',
+        label: 'Overdue',
         value: counts[DueStatus.overdue],
         color: ViewerColors.overdue,
         filter: 'overdue',
       ),
       (
-        label: manual ? 'Stichtag bis 30 Tage' : 'Heute bis 30 Tage',
+        label: manual ? 'Reference date to 30 days' : 'Today to 30 days',
         value: counts.soon,
         color: ViewerColors.soon,
         filter: 'soon',
       ),
       (
-        label: '31–90 Tage',
+        label: '31–90 days',
         value: counts[DueStatus.medium],
         color: ViewerColors.medium,
         filter: 'medium',
       ),
       (
-        label: 'Später als 90 Tage',
+        label: 'More than 90 days',
         value: counts[DueStatus.later],
         color: ViewerColors.later,
         filter: 'later',
       ),
       (
-        label: 'Ohne gültigen Termin',
+        label: 'No valid due date',
         value: counts[DueStatus.missing],
         color: ViewerColors.missing,
         filter: 'missing',
@@ -217,14 +217,14 @@ class DashboardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionTitle(
-            label: 'Prüftermine',
-            title: 'Fälligkeiten',
-            subtitle: 'Verteilung der nächsten Prüftermine',
+            label: 'Inspection dates',
+            title: 'Due dates',
+            subtitle: 'Distribution of upcoming inspections',
           ),
           const SizedBox(height: 20),
           Center(
             child: Semantics(
-              label: 'Fälligkeiten: $accessibleSummary',
+              label: 'Due dates: $accessibleSummary',
               child: SizedBox(
                 width: 175,
                 height: 175,
@@ -250,7 +250,7 @@ class DashboardView extends StatelessWidget {
                           ),
                         ),
                         const Text(
-                          'Geräte gesamt',
+                          'Total devices',
                           style: TextStyle(
                             fontSize: 11,
                             color: ViewerColors.muted,
@@ -323,16 +323,16 @@ class DashboardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionTitle(
-            label: 'Prioritäten',
-            title: 'Überfällige Geräte nach Standort',
-            subtitle: 'Die acht grössten Rückstände · zum Filtern antippen',
+            label: 'Priorities',
+            title: 'Overdue devices by location',
+            subtitle: 'Eight largest backlogs · tap to filter',
           ),
           const SizedBox(height: 20),
           if (top.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 55),
               child: Text(
-                'Keine überfälligen Geräte in diesem Bereich.',
+                'No overdue devices in this scope.',
                 style: TextStyle(color: ViewerColors.muted),
               ),
             ),
@@ -390,8 +390,8 @@ class DashboardView extends StatelessWidget {
       (current, month) => math.max(current, month.count),
     );
     final startLabel = controller.filters.manualDate == null
-        ? 'heute'
-        : 'Stichtag ${controller.reference.display}';
+        ? 'today'
+        : 'reference date ${controller.reference.display}';
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,11 +402,11 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SectionTitle(
-                label: 'Vorausschau',
+                label: 'Forecast',
                 title:
-                    'Fälligkeiten der nächsten ${controller.filters.horizonMonths} Monate',
+                    'Due dates for the next ${controller.filters.horizonMonths} months',
                 subtitle:
-                    'Ab $startLabel; überfällige Geräte sind nicht erneut enthalten.',
+                    'Starting $startLabel; overdue devices are not counted again.',
               ),
               SizedBox(
                 width: 155,
@@ -414,12 +414,12 @@ class DashboardView extends StatelessWidget {
                   key: ValueKey(controller.filters.horizonMonths),
                   isExpanded: true,
                   initialValue: controller.filters.horizonMonths,
-                  decoration: const InputDecoration(labelText: 'Zeitraum'),
+                  decoration: const InputDecoration(labelText: 'Period'),
                   items: [
                     for (final value in horizons)
                       DropdownMenuItem(
                         value: value,
-                        child: Text('$value Monate'),
+                        child: Text('$value months'),
                       ),
                   ],
                   onChanged: (value) {
@@ -439,7 +439,7 @@ class DashboardView extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Monat antippen → Geräte anzeigen · bei Bedarf seitlich wischen',
+            'Tap a month to view devices · swipe horizontally if needed',
             style: TextStyle(fontSize: 11, color: ViewerColors.muted),
           ),
           const SizedBox(height: 14),
@@ -461,7 +461,7 @@ class DashboardView extends StatelessWidget {
                       Semantics(
                         button: true,
                         label:
-                            '${monthLabel(month.start)}: ${month.count} Geräte',
+                            '${monthLabel(month.start)}: ${month.count} devices',
                         child: InkWell(
                           onTap: () => controller.openFiltered(
                             month: month.start.monthKey,

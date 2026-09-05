@@ -1,12 +1,12 @@
 # Test Viewer · Flutter
 
-Offline-Erweiterung zur Test-Master App für die Auswertung von Geräteprüfungen auf Android und iOS. Version **2.0.0+6**. Die Oberfläche und Auswertungslogik sind mit Dart und Flutter-Widgets umgesetzt; **keine WebView**.
+Offline companion app for Test-Master inspection data on Android and iOS. Version **2.0.0+6**. The interface and reporting logic use Dart and native Flutter widgets; there is **no WebView**.
 
-**Projektstatus:** Flutter-Analyse, Widget-/Logiktests und Android-Debug-Build wurden lokal erfolgreich ausgeführt. Der iOS-Build benötigt weiterhin macOS mit Xcode. Details: [Build- und Teststatus](docs/BUILD_AND_TEST_STATUS.md).
+**Project status:** Flutter analysis, all logic/widget tests, and signed Android debug/release APK builds have completed successfully. The iOS build still requires macOS with Xcode. See [Build and test status](docs/BUILD_AND_TEST_STATUS.md) for details.
 
-## Starten
+## Getting started
 
-Projektordner mit `pubspec.yaml` in Android Studio mit Flutter-Plugin oder VS Code öffnen. Vorgesehenes SDK: **Flutter 3.44.9 / Dart 3.12**; `.fvmrc` legt die Flutter-Version fest. Android verwendet JDK 17.
+Open the folder containing `pubspec.yaml` in Android Studio with the Flutter plugin or in VS Code. The supported toolchain is **Flutter 3.44.9 / Dart 3.12**; `.fvmrc` pins the Flutter version. Android uses JDK 17.
 
 ```sh
 flutter pub get
@@ -15,39 +15,43 @@ flutter test
 flutter run
 ```
 
-Für den ersten Blick ohne eigene Datenbank auf **„Mit fiktiven Daten ausprobieren“** tippen. Alternativ:
+Select **Try with sample data** on the welcome screen to explore the app without your own database. Alternatively:
 
 ```sh
 flutter run --dart-define=DEMO_MODE=true
 ```
 
-Die App ist für Android 8.0+ und iOS 15+ konfiguriert. Die Signierung für echte Geräte und Stores erfolgt mit den eigenen Schlüsseln beziehungsweise dem eigenen Apple-Team.
+The app targets Android 8.0+ and iOS 15+. Builds for physical devices and app stores must be signed with your own Android key or Apple team.
 
-### Windows: gleicher Paketcache in IDE und Build-Werkzeugen
+### Windows: use one package cache for the IDE and build tools
 
-Bei paketierten Windows-Apps (beispielsweise Codex) kann `AppData` in einen eigenen App-Datenbereich umgeleitet werden. Dann verweist `.dart_tool/package_config.json` auf Pakete, die für den erzeugenden Prozess existieren, für VS Code aber nicht. Ein Android-Build kann trotzdem erfolgreich sein, während F5 mit `Exited (1)` abbricht und die App in der Startpause bleibt.
+Packaged Windows apps can redirect `AppData` into an app-specific data area. In that situation, `.dart_tool/package_config.json` can reference packages that are available to the process that created it but unavailable to VS Code. An Android build may still succeed while F5 exits with `Exited (1)` and the app remains paused at startup.
 
-In diesem Fall `PUB_CACHE` für alle Werkzeuge auf denselben Ordner **ausserhalb von AppData** setzen, zum Beispiel `C:\Users\<Benutzer>\development\pub-cache`, und `flutter pub get` erneut ausführen. In VS Code denselben Wert unter `dart.env.PUB_CACHE` und `terminal.integrated.env.windows.PUB_CACHE` verwenden; bestehende Terminals nach einer Umgebungsänderung neu öffnen. Die lokale `.vscode/launch.json` startet `lib/main.dart` im Flutter-Debugmodus.
+Set `PUB_CACHE` for all tools to the same directory **outside AppData**, for example `C:\Users\<user>\development\pub-cache`, and run `flutter pub get` again. In VS Code, use the same value for `dart.env.PUB_CACHE` and `terminal.integrated.env.windows.PUB_CACHE`; reopen existing terminals after changing the environment. The local `.vscode/launch.json` starts `lib/main.dart` in Flutter debug mode.
 
-## Enthaltene Ansichten
+## VS Code release task
 
-**Dashboard:** Kundentitel aus `tblCustomer.Name`, sechs Kennzahlen, Fälligkeitsverteilung, acht Standorte mit den grössten Rückständen und eine anklickbare Monatsvorschau. Der Zeitraum ist auf 12, 24, 36, 48 oder 60 Monate einstellbar. Die Vorschau beginnt am Stichtag, zeigt dessen angebrochenen Monat mit an und zählt keine bereits überfälligen Termine erneut.
+Press `Ctrl+Shift+B` in VS Code to run the default task **Test Viewer: build signed release APK**. It restores packages, runs analysis and all tests, and creates the signed APK at `build/app/outputs/flutter-apk/app-release.apk`.
 
-**Geräte:** Suche, mehrere Standorte gleichzeitig, Standortsuche, Ergebnis- und Fälligkeitsfilter, numerisch sinnvolle Sortierung sowie Gerätedetails. Auf breiten Displays erscheint die Tabelle, auf schmalen Displays eine Kartenliste. 25 Einträge pro Seite sind voreingestellt; wählbar sind 5, 10, 25, 50 und 100. Die gesamte Seite scrollt vertikal, nicht ein begrenzter Tabellenbereich.
+## Included views
 
-**Stichtag:** Automatisch der aktuelle lokale Tag oder ein gespeichertes manuelles Datum. „Heute · automatisch“ schaltet zurück. Einstellungen bleiben erhalten. Kundenbezeichnungen werden aus der Datenbank gelesen, nicht als feste Firmenmarke eingebaut.
+**Dashboard:** Customer title from `tblCustomer.Name`, six summary metrics, a due-date breakdown, the eight locations with the largest backlogs, and an interactive monthly forecast. The forecast horizon can be 12, 24, 36, 48, or 60 months. It starts on the reference date, includes its partial month, and does not count already overdue inspections again.
 
-## Datenbank verbinden
+**Devices:** Search, multi-location selection, location search, result and due-date filters, natural numeric sorting, and device details. Wide displays use a table; narrow displays use a card list. The default page size is 25, with 5, 10, 25, 50, and 100 available. The whole page scrolls vertically instead of using a constrained table area.
 
-„Datenbank“ → „Ordner wählen“ → Zugriff bestätigen → Dateiname oder relativen Pfad eintragen → „Pfad speichern & laden“.
+**Reference date:** Either the current local date or a saved manual date. **Today · automatic** switches back to the current date. Settings persist. Customer names come from the database and are not hard-coded branding.
 
-Voreingestellt ist `pcdrdata.sqlite3`. Ein Unterordnerpfad wie `Prüfungen/pcdrdata.sqlite3` ist möglich. Absolute Pfade und `..` sind absichtlich gesperrt. Android verwendet eine gespeicherte SAF-Ordnerfreigabe, iOS eine gespeicherte Dateiauswahl mit Bookmark. Beim Start, bei der Rückkehr in die App und über „Aktualisieren“ wird erneut aus der ausgewählten Quelle gelesen.
+## Connecting a database
 
-Nur eine private temporäre Lesekopie wird mit SQLite geöffnet. Die Quelldatei wird nicht verändert. Aktive WAL-/Journaldateien, unterschiedliche Hashes der zwei Lesedurchgänge und inkonsistente Datenbanken führen zu einer Meldung. In diesem Fall die Prüfung fertig speichern, die Prüf-App schliessen und neu laden; Journaldateien nicht löschen. Ein alter Datenstand nach einem Ladefehler wird ausdrücklich markiert.
+Select **Database** → **Choose folder** → grant access → enter a file name or relative path → **Save path & load**.
+
+The default file is `pcdrdata.sqlite3`. A subfolder path such as `Inspections/pcdrdata.sqlite3` is supported. Absolute paths and `..` are deliberately rejected. Android stores a Storage Access Framework folder grant; iOS stores a document-picker bookmark. The app reads the selected source at startup, when returning to the foreground, and when **Refresh** is selected.
+
+SQLite opens only a private temporary read copy. The source file is never modified. Active WAL/journal files, mismatched hashes between two read passes, and inconsistent databases produce a clear error. Finish and save the inspection, close the inspection app, and refresh; never delete journal files. Data retained after a load failure is explicitly marked as stale.
 
 ## Builds
 
-Windows, PowerShell im Projektordner:
+Windows PowerShell from the project folder:
 
 ```powershell
 .\Build.ps1 -Target Check
@@ -56,7 +60,7 @@ Windows, PowerShell im Projektordner:
 .\Build.ps1 -Target AppBundle
 ```
 
-`Release` und `AppBundle` benötigen `android/key.properties` mit dem privaten Schlüssel. Vorlage: `android/key.properties.example`. Schlüssel gehören ausschliesslich in den ignorierten lokalen Ordner `signing/`. **Nicht** in Git einchecken.
+`Release` and `AppBundle` require a local `android/key.properties` file that references the private signing key. Use `android/key.properties.example` as a template. Keys and passwords must remain outside version control.
 
 macOS/Linux:
 
@@ -66,30 +70,22 @@ bash tool/build.sh ios-simulator
 bash tool/build.sh ios-archive
 ```
 
-Die Scripts führen vor dem Build `flutter analyze` und `flutter test` aus und stoppen bei Fehlern. Der Android-Gradle-Wrapper wird beim ersten Flutter-Build aus dem Flutter SDK erzeugt; `local.properties`, `Generated.xcconfig` und die Plugin-Registrierung werden ebenfalls durch Flutter generiert. Kein `flutter create` oder Überschreiben der Plattformordner nötig.
+The scripts run `flutter analyze` and `flutter test` before building and stop on failure. Flutter generates the Android Gradle wrapper, `local.properties`, `Generated.xcconfig`, and plugin registration when required. Do not run `flutter create` over the existing platform folders.
 
-**Release-ID:** `com.pezezzle.testmasterviewer` auf beiden Plattformen. Android-Debug-Builds verwenden absichtlich `com.pezezzle.testmasterviewer.debug`, damit sie neben einer bereits installierten, anders signierten Release-App getestet werden können.
+**Release ID:** `com.pezezzle.testmasterviewer` on both platforms. Android debug builds deliberately use `com.pezezzle.testmasterviewer.debug`, allowing them to coexist with an installed release signed by a different key.
 
-## GitHub veröffentlichen
+## GitHub repository
 
-Das Quellpaket ist für ein **neues öffentliches Repository `pezezzle/testmaster-viewer-flutter`** vorbereitet. Das Paket selbst bedeutet nicht, dass dieses Repository bereits online angelegt wurde.
+The source is stored in the private repository `pezezzle/Test-Viewer`. `Publish-ToGitHub.ps1` is intended only for creating a new private repository from a fresh source folder; it refuses existing Git history and never force-pushes.
 
-In einem frisch entpackten Quellordner mit installiertem Git und GitHub CLI:
+GitHub Actions includes validation, an Android debug build, an iOS simulator build, and a manually triggered signed Android build. Simulator and debug artifacts are not store releases. Release secrets must only be configured through protected GitHub environment secrets.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Publish-ToGitHub.ps1
-```
+## Further documentation
 
-Das Script prüft das Konto `pezezzle`, blockiert offensichtliche private Dateitypen, verweigert vorhandene Git-Historie und überschreibt kein bestehendes Repository. Vor der Veröffentlichung alle Quelldateien prüfen. Bereits vorhandene Git-Historie oder ein Repository aus einem Git-Bundle bewusst mit normalen Git-Befehlen veröffentlichen, nicht durch dieses Initial-Uploadscript.
+- [Architecture and data model](docs/ARCHITECTURE.md)
+- [Build and test status](docs/BUILD_AND_TEST_STATUS.md)
+- [Release, signing, and migration](docs/RELEASE.md)
+- [Physical-device test plan](docs/DEVICE_TEST_PLAN.md)
+- [Synthetic sample data](example/README.md)
 
-GitHub Actions enthält Prüfungen, einen Android-Debug-Build, einen iOS-Simulator-Build und einen manuell auslösbaren signierten Android-Build. Die Workflows sind vorbereitet, **nicht bereits erfolgreich ausgeführt**. Simulator- und Debug-Artefakte sind keine Store-Releases.
-
-## Weiterführende Dokumente
-
-- [Architektur und Datenmodell](docs/ARCHITECTURE.md)
-- [Build- und Teststatus](docs/BUILD_AND_TEST_STATUS.md)
-- [Release, Signierung und Migration](docs/RELEASE.md)
-- [Testplan auf echten Geräten](docs/DEVICE_TEST_PLAN.md)
-- [Fiktive Beispieldaten](example/README.md)
-
-Es ist keine allgemeine Open-Source-Lizenz festgelegt. Eine öffentliche Ablage allein ist keine Lizenzfreigabe. Private Prüfdaten, Signaturschlüssel, Zugangsdaten und Schriftdateien sind nicht Bestandteil dieses Projekts.
+No general open-source license has been granted. Repository access alone is not a license grant. Private inspection data, signing keys, credentials, and proprietary fonts are not part of this project.

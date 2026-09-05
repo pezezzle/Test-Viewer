@@ -8,13 +8,13 @@ import 'dialogs.dart';
 import 'theme.dart';
 
 const sortLabels = {
-  'NextTest': 'Nächste Prüfung',
-  'Location': 'Standort',
-  'IDNumber': 'Gerätenummer',
-  'DeviceDescription': 'Bezeichnung',
-  'Manufacturer': 'Hersteller',
-  'LastTest': 'Letzte Prüfung',
-  'TestResult': 'Ergebniscode',
+  'NextTest': 'Next inspection',
+  'Location': 'Location',
+  'IDNumber': 'Device number',
+  'DeviceDescription': 'Description',
+  'Manufacturer': 'Manufacturer',
+  'LastTest': 'Last inspection',
+  'TestResult': 'Result code',
 };
 
 class DevicesView extends StatefulWidget {
@@ -65,24 +65,24 @@ class _DevicesViewState extends State<DevicesView> {
     final rows = controller.pageRows;
     final all = controller.filtered;
     final dueOptions = {
-      '*': 'Alle Fälligkeiten',
-      'overdue': 'Überfällig',
+      '*': 'All due dates',
+      'overdue': 'Overdue',
       'today': filters.manualDate == null
-          ? 'Heute fällig'
-          : 'Am Stichtag fällig',
+          ? 'Due today'
+          : 'Due on reference date',
       'soon': filters.manualDate == null
-          ? 'Heute bis in 30 Tagen'
-          : 'Stichtag bis in 30 Tagen',
-      'medium': 'In 31–90 Tagen',
-      'later': 'Später als in 90 Tagen',
-      'missing': 'Ohne gültigen Termin',
+          ? 'Today through 30 days'
+          : 'Reference date through 30 days',
+      'medium': 'In 31–90 days',
+      'later': 'More than 90 days',
+      'missing': 'No valid due date',
     };
     const resultOptions = {
-      '*': 'Alle Ergebnisse',
+      '*': 'All results',
       'OK': 'OK',
       'F': 'F',
-      'empty': 'Ohne Ergebnis',
-      'other': 'Andere Codes',
+      'empty': 'No result',
+      'other': 'Other codes',
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -116,14 +116,14 @@ class _DevicesViewState extends State<DevicesView> {
                             key: const ValueKey('device-search'),
                             controller: search,
                             decoration: InputDecoration(
-                              labelText: 'Geräte suchen',
+                              labelText: 'Search devices',
                               hintText:
-                                  'Gerätenummer, Bezeichnung, Kunde, Standort …',
+                                  'Device number, description, customer, location …',
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: search.text.isEmpty
                                   ? null
                                   : IconButton(
-                                      tooltip: 'Suche leeren',
+                                      tooltip: 'Clear search',
                                       onPressed: () {
                                         debounce?.cancel();
                                         search.clear();
@@ -154,7 +154,7 @@ class _DevicesViewState extends State<DevicesView> {
                             initialValue: filters.due,
                             isExpanded: true,
                             decoration: const InputDecoration(
-                              labelText: 'Fälligkeit',
+                              labelText: 'Due date',
                             ),
                             items: dueOptions.entries
                                 .map(
@@ -183,7 +183,7 @@ class _DevicesViewState extends State<DevicesView> {
                             initialValue: filters.result,
                             isExpanded: true,
                             decoration: const InputDecoration(
-                              labelText: 'Ergebniscode',
+                              labelText: 'Result code',
                             ),
                             items: resultOptions.entries
                                 .map(
@@ -215,7 +215,7 @@ class _DevicesViewState extends State<DevicesView> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      '${formatCount(all.length)} von ${formatCount(controller.scope.length)} Geräten',
+                      '${formatCount(all.length)} of ${formatCount(controller.scope.length)} devices',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     if (filters.month.isNotEmpty)
@@ -236,7 +236,7 @@ class _DevicesViewState extends State<DevicesView> {
                             '${filters.sortField}:${filters.descending ? 'desc' : 'asc'}',
                         isExpanded: true,
                         decoration: const InputDecoration(
-                          labelText: 'Sortierung',
+                          labelText: 'Sort order',
                         ),
                         items: [
                           for (final field in sortLabels.entries)
@@ -273,7 +273,7 @@ class _DevicesViewState extends State<DevicesView> {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        'Keine passenden Geräte',
+                        'No matching devices',
                         style: TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w600,
@@ -281,7 +281,7 @@ class _DevicesViewState extends State<DevicesView> {
                       ),
                       SizedBox(height: 6),
                       Text(
-                        'Ändere die Suche oder setze die Filter zurück.',
+                        'Change the search or reset the filters.',
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -311,7 +311,7 @@ class _DevicesViewState extends State<DevicesView> {
                         key: ValueKey('page-size-${filters.pageSize}'),
                         initialValue: filters.pageSize,
                         decoration: const InputDecoration(
-                          labelText: 'Einträge pro Seite',
+                          labelText: 'Entries per page',
                         ),
                         items: [
                           for (final value in pageSizes)
@@ -331,8 +331,8 @@ class _DevicesViewState extends State<DevicesView> {
                     ),
                     Text(
                       all.isEmpty
-                          ? 'Keine Treffer'
-                          : '${controller.page * filters.pageSize + 1}–${controller.page * filters.pageSize + rows.length} · Seite ${controller.page + 1} / ${controller.totalPages}',
+                          ? 'No results'
+                          : '${controller.page * filters.pageSize + 1}–${controller.page * filters.pageSize + rows.length} · Page ${controller.page + 1} / ${controller.totalPages}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: ViewerColors.muted,
@@ -346,14 +346,14 @@ class _DevicesViewState extends State<DevicesView> {
                               ? () => changePage(controller.page - 1)
                               : null,
                           icon: const Icon(Icons.chevron_left),
-                          label: const Text('Zurück'),
+                          label: const Text('Previous'),
                         ),
                         OutlinedButton.icon(
                           onPressed: controller.page + 1 < controller.totalPages
                               ? () => changePage(controller.page + 1)
                               : null,
                           icon: const Icon(Icons.chevron_right),
-                          label: const Text('Weiter'),
+                          label: const Text('Next'),
                         ),
                       ],
                     ),
@@ -366,7 +366,7 @@ class _DevicesViewState extends State<DevicesView> {
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 18),
           child: Text(
-            'Gerät antippen → Details. Ergebnis- und Statuscodes bleiben unverändert. Die gesamte Seite scrollt; es gibt keinen begrenzten vertikalen Tabellenbereich.',
+            'Tap a device for details. Result and status codes remain unchanged. The entire page scrolls; there is no constrained vertical table area.',
             style: TextStyle(fontSize: 12, color: ViewerColors.muted),
           ),
         ),
@@ -456,11 +456,11 @@ class _DevicesViewState extends State<DevicesView> {
                 runSpacing: 8,
                 children: [
                   _smallDate(
-                    'Letzte Prüfung',
+                    'Last inspection',
                     displayDate(device.value('LastTest')),
                   ),
                   _smallDate(
-                    'Nächste Prüfung',
+                    'Next inspection',
                     displayDate(device.value('NextTest')),
                   ),
                 ],
@@ -523,13 +523,13 @@ class _DevicesViewState extends State<DevicesView> {
       'TestResult',
     ];
     final labels = [
-      'Geräte-Nr.',
-      'Gerät',
-      'Standort',
-      'Letzte Prüfung',
-      'Nächste Prüfung',
-      'Fälligkeit',
-      'Ergebnis',
+      'Device no.',
+      'Device',
+      'Location',
+      'Last inspection',
+      'Next inspection',
+      'Due date',
+      'Result',
     ];
     final sortIndex = fields.indexOf(controller.filters.sortField);
     return SingleChildScrollView(

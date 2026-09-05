@@ -1,34 +1,41 @@
-# Release und Migration
+# Release and migration
 
 ## Android
 
-Das Projekt verwendet für Release `com.pezezzle.testmasterviewer`, Version `2.0.0`, versionCode `6`. Ein Update über die frühere App erfordert denselben bisherigen privaten Signaturschlüssel. Dieser ist absichtlich **nicht** im öffentlichen Projekt enthalten. Aus dem privaten Backup nur lokal übernehmen, `android/key.properties.example` nach `android/key.properties` kopieren und die tatsächlichen Werte eintragen.
+The Android release uses application ID `com.pezezzle.testmasterviewer`, version `2.0.0`, and version code `6`. Updating an earlier installation requires the same private signing key. The key is deliberately **not** stored in this repository. Restore it only to a secure local location, copy `android/key.properties.example` to the ignored `android/key.properties`, and enter the real local values.
 
-Der Ordnerzugriff der bisherigen Android-App wird aus SharedPreferences `viewer` / `tree` und `path` übernommen, wenn die App unter derselben ID und Signatur aktualisiert wird. Die früher in der WebView gespeicherten Filter werden **nicht** migriert; Standorte, Seitengrösse und Stichtag können einmal neu eingestellt werden. Keine Deinstallation erforderlich, sobald ein korrekt signiertes Update vorliegt.
+When the application ID and signature match, an update retains the previous Android folder grant stored in SharedPreferences under `viewer`, `tree`, and `path`. Filters previously stored by the WebView are **not** migrated; locations, page size, and reference date can be configured again. A correctly signed update does not require uninstalling the existing app.
 
-Debug-Builds sind absichtlich getrennte Installationen mit `.debug` am Ende der ID und übernehmen daher keine Freigaben aus Release. Eine Debug-APK ist kein signiertes Produktionsupdate.
+Debug builds are deliberately separate installations with an application ID ending in `.debug`; they do not inherit release permissions. A debug APK is not a signed production update.
 
-Vor einem Store-Upload `flutter build appbundle --release` und die Prüfroutinen aus dem Testplan ausführen. Es ist kein automatischer Upload in Google Play eingerichtet.
+Before a store upload, run `flutter build appbundle --release` and complete the physical-device test plan. There is no automatic Google Play upload.
 
-## Android-Signierung in GitHub Actions
+## Local Android signing
 
-Optional ein GitHub-Environment **android-release** einrichten und Review-Freigaben aktivieren. Dort vier Secrets hinterlegen: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Es wird ein PKCS12-Key erwartet. Der Workflow schreibt den Key nur in den temporären Runner-Speicher und löscht ihn am Ende. Private Werte gehören niemals in YAML oder Commits.
+`Build.ps1 -Target Release` and the default VS Code build task create a signed release APK. `Build.ps1 -Target AppBundle` creates the Play Store bundle. The build fails rather than falling back to a debug key when `android/key.properties` is missing.
 
-Die Datei `.github/workflows/android-release.yml` wird ausschliesslich manuell ausgelöst. Sie erstellt signierte APK/AAB-Artefakte, legt aber keine öffentliche GitHub-Release an und lädt nichts in einen Store hoch.
+Never commit `android/key.properties`, signing keys, or passwords. The repository ignores these files, but ignore rules are not a substitute for reviewing Git history.
+
+## Android signing in GitHub Actions
+
+Optionally create a protected GitHub environment named **android-release** with required reviewers. Configure four secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. The workflow expects a PKCS12 key, writes it only to temporary runner storage, and removes it at the end. Private values must never appear in YAML or commits.
+
+`.github/workflows/android-release.yml` is manual-only. It produces signed APK/AAB artifacts but does not create a public GitHub release or upload anything to an app store.
 
 ## iOS
 
-Bundle-ID `com.pezezzle.testmasterviewer`, Deployment Target iOS 15. In `ios/Runner.xcworkspace` das eigene Team unter **Signing & Capabilities** auswählen. Kein fremdes Team und keine fremden Zertifikate sind vorkonfiguriert. Flutter erzeugt die Plugin-Registrierung und SDK-Konfiguration beim ersten `pub get`/Build.
+The bundle ID is `com.pezezzle.testmasterviewer`, with iOS 15 as the deployment target. Open `ios/Runner.xcworkspace` and select your team under **Signing & Capabilities**. No third-party team or certificate is preconfigured. Flutter creates plugin registration and SDK configuration on the first `pub get`/build.
 
-`bash tool/build.sh ios-simulator` erzeugt einen unsignierten Simulator-Build. `bash tool/build.sh ios-archive` verwendet `flutter build ipa --release` und benötigt die eigene gültige Signierung. Das CI-Artefakt des iOS-Simulators kann nicht als IPA auf ein iPhone installiert oder in den App Store eingereicht werden.
+`bash tool/build.sh ios-simulator` creates an unsigned simulator build. `bash tool/build.sh ios-archive` runs `flutter build ipa --release` and requires valid signing owned by the publisher. The CI simulator artifact cannot be installed on an iPhone or submitted to the App Store as an IPA.
 
-Vor der Einreichung insbesondere die dauerhafte Ordnerfreigabe, den Zugriff nach Neustarts, den tatsächlichen Dateiprovider, Privacy Manifest, App-Icon und Geräteorientierungen prüfen. Apple-Team, Store-Einträge, rechtliche Angaben und Nutzungsrechte müssen vom Herausgeber festgelegt werden. Die mitgelieferte Beispielansicht kann für eine nachvollziehbare App-Prüfung verwendet werden.
+Before submission, verify persistent folder access, access after a device restart, the actual file provider, privacy manifest, app icon, and device orientations. The publisher must provide the Apple team, store listing, legal information, and usage rights. The included synthetic demo provides a reproducible review path.
 
-## Projektwerkzeuge
+## Project toolchain
 
-Flutter ist auf 3.44.9 festgelegt. Android: Gradle 9.1.0, AGP 9.0.1, Java 17, minSdk 26. Die beiden AGP-9-Kompatibilitätsschalter entsprechen der Flutter-3.44.9-Vorlage. `flutter pub get` erzeugt beim ersten echten Lauf eine `pubspec.lock`; diese anschliessend mit dem geprüften Stand einchecken. Sie wurde nicht erfunden oder vorgetäuscht.
+Flutter is pinned to 3.44.9. Android uses Gradle 9.1.0, AGP 9.0.1, Java 17, and minSdk 26. The two AGP 9 compatibility switches match the Flutter 3.44.9 template. `pubspec.lock` records the verified dependency state and is committed.
 
-Referenzen zur Implementierung:
+Implementation references:
+
 - https://docs.flutter.dev/platform-integration/platform-channels
 - https://docs.flutter.dev/deployment/android
 - https://docs.flutter.dev/deployment/ios
