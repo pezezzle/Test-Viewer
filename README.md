@@ -32,7 +32,7 @@ The app targets Android 8.0+. Debug builds use standard debug signing. Release a
 
 ## Download
 
-[Download the latest signed Android APK](https://github.com/pezezzle/Test-Viewer/releases/latest/download/Test-Viewer-2.0.0+6.apk)
+[Download the latest signed Android APK](https://github.com/pezezzle/Test-Viewer/releases/latest/download/Test-Viewer-2.0.1+7.apk)
 
 Release files are published as GitHub Release assets and are not committed to the source repository. Verify the SHA-256 checksum listed in the corresponding release notes before installation.
 
@@ -40,6 +40,7 @@ Release files are published as GitHub Release assets and are not committed to th
 
 | Version | Published | Android download | Changes |
 |---|---:|---|---|
+| [2.0.1+7](https://github.com/pezezzle/Test-Viewer/releases/tag/v2.0.1%2B7) | 2026-09-05 | [Signed APK](https://github.com/pezezzle/Test-Viewer/releases/download/v2.0.1%2B7/Test-Viewer-2.0.1+7.apk) | [Changelog](CHANGELOG.md) |
 | [2.0.0+6](https://github.com/pezezzle/Test-Viewer/releases/tag/v2.0.0%2B6) | 2026-09-05 | [Signed APK](https://github.com/pezezzle/Test-Viewer/releases/download/v2.0.0%2B6/Test-Viewer-2.0.0+6.apk) | [Changelog](CHANGELOG.md) |
 
 ## Windows troubleshooting
